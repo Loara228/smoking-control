@@ -26,10 +26,19 @@ async fn main() -> std::io::Result<()> {
     let app_state = AppState::new().await;
     sql::create_table(&app_state.pool).await.unwrap();
 
+    // sql::insert_user(crate::models::User {
+    //     id: -1,
+    //     username: "test1".to_owned(),
+    //     password: "pwd".to_owned(),
+    //     token: None,
+    //     time: 0
+    // }, &app_state.pool).await.unwrap();
+
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(app_state.clone()))
             .service(services::index)
+            .service(services::user)
         
     })
     .bind(("127.0.0.1", 8080))?
