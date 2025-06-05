@@ -2,7 +2,7 @@ mod responses;
 mod query_params;
 
 use actix_web::*;
-use crate::{models::User, services::query_params::CreateUserParam, sql, AppState};
+use crate::{models::User, services::query_params::UserParams, sql, AppState};
 
 #[get("/")]
 async fn index() -> impl Responder {
@@ -47,13 +47,13 @@ async fn users_get(state: web::Data<AppState>, request: HttpRequest) -> impl Res
 }
 
 /// # Returns
-/// ```200``` - Success<br>
-/// ```409``` - If a user with that name already exists
+/// ```200``` Success<br>
+/// ```409``` If a user with that name already exists
 /// 
 /// # Usage
 /// http://127.0.0.1:8080/users/create?username=my_username&password=my_password
 #[get("users/create")]
-async fn users_create(state: web::Data<AppState>, query: web::Query<CreateUserParam>) -> HttpResponse {
+async fn users_create(state: web::Data<AppState>, query: web::Query<UserParams>) -> HttpResponse {
     let new_user = User::create(query.username.clone(), query.password.clone());
     match sql::insert_user(new_user, &state.pool).await {
         Ok(_) => {
@@ -61,6 +61,24 @@ async fn users_create(state: web::Data<AppState>, query: web::Query<CreateUserPa
         },
         Err(_) => {
             return HttpResponse::Conflict().body("A user with that name already exists");
+        },
+    }
+}
+
+/// # Returns
+/// ```200``` token<br> 
+/// ```401``` failed
+/// 
+/// # Usage
+/// http://127.0.0.1:8080/auth?username=my_username&password=my_password
+#[get("auth")]
+async fn auth(state: web::Data<AppState>, query: web::Query<UserParams>) -> impl Responder {
+    match sql::try_auth(query.0.username.clone(), query.0.username, &state.pool).await {
+        Ok(token) => {
+            return HttpResponse::Ok().body(token);
+        },
+        Err(e) => {
+            return HttpResponse::Unauthorized().body(format!("{e}"));
         },
     }
 }

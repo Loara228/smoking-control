@@ -30,12 +30,14 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(app_state.clone()))
             .service(services::index)
+            .service(services::auth)
+            
             .service(services::users_get)
             .service(services::users_create)
         
     })
-    // .bind(("0.0.0.0", 8080))?
-    .bind(("127.0.0.1", 8080))?
+    .bind(("0.0.0.0", 8080))?
+    // .bind(("127.0.0.1", 8080))?
     .run()
     .await
 }

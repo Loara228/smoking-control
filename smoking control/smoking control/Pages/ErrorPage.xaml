@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="smoking_control.Pages.ErrorPage"
+             Title="ErrorPage">
+    <VerticalStackLayout BackgroundColor="#0077D6"
+                         Spacing="20">
+        <Label TextColor="#ebebff"
+               Text=":("
+               FontSize="60"
+               VerticalOptions="Center" 
+               FontAttributes="Bold"
+               HorizontalOptions="Start" />
+        <ScrollView>
+            <Editor Text="empty"
+                    FontSize="16"
+                    IsReadOnly="True"
+                    HeightRequest="600"
+                    x:Name="excOutput"/>
+        </ScrollView>
+        <Button Text="да поебать мне"
+                Clicked="Button_Clicked"/>
+    </VerticalStackLayout>
+</ContentPage>
