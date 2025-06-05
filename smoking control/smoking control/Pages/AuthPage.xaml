@@ -4,18 +4,21 @@
              x:Class="smoking_control.Pages.AuthPage"
              Title="AuthPage">
     <VerticalStackLayout Padding="30" Spacing="25">
-        <Label 
-            Text="Страница авторизации"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-        
+
         <Entry Placeholder="Username"
                x:Name="textbox1"/>
 
         <Entry Placeholder="Password"
                x:Name="textbox2"
                IsPassword="True"/>
-        
+
+        <Label Text="Incorrect username or password"
+               FontSize="16"
+               HorizontalOptions="Center"
+               TextColor="{StaticResource Error}"
+               x:Name="labelHint"
+               IsVisible="False"/>
+
         <Button Text="Войти"
                 x:Name="button1"
                 Clicked="Button_Clicked"/>

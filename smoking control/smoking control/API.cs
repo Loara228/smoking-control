@@ -23,7 +23,6 @@ namespace smoking_control
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 throw new ApiException(await response.Content.ReadAsStringAsync(), response.StatusCode);
-                return false;
             }
 
             _token = await response.Content.ReadAsStringAsync();
@@ -40,7 +39,7 @@ namespace smoking_control
         // returns http://192.168.0.148:8080/users/get/1
         public string BuildQuery(string route, (string pName, string pValue)[]? queries = default)
         {
-            string result = $"{PROTOCOL}://{Hostname}:{Port}/{route}?";
+            string result = $"{PROTOCOL}://{HOSTNAME}:{PORT}/{route}?";
             if (queries is not null)
             {
                 foreach ((string k, string v) pair in queries)
@@ -52,14 +51,9 @@ namespace smoking_control
             return result.Substring(0, result.Length - 1);
         }
 
-        public string Hostname
+        public static API Current
         {
-            get => HOSTNAME;
-        }
-
-        public ushort Port
-        {
-            get => PORT;
+            get => _current;
         }
 
         public string Token
@@ -69,6 +63,8 @@ namespace smoking_control
 
         private HttpClient _client;
         private string? _token = null;
+
+        private static API _current = new API();
 
         // if http <application android:usesCleartextTraffic="true"></application>
         private const string PROTOCOL = "http";

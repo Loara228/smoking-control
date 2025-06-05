@@ -6,11 +6,10 @@ namespace smoking_control
     {
         public MainPage()
         {
-            _api = new API();
             InitializeComponent();
 
             Loaded += async (s, e) => {
-                var page = new Pages.AuthPage(_api);
+                var page = new Pages.AuthPage();
                 await Navigation.PushModalAsync(page);
                 page.Unloaded += (s, e) =>
                 {
@@ -26,7 +25,6 @@ namespace smoking_control
             label1.Text = token.ToString();
         }
 
-        private API _api = new API();
         private string token = "empty";
     }
 

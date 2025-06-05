@@ -10,12 +10,13 @@
                FontSize="60"
                VerticalOptions="Center" 
                FontAttributes="Bold"
-               HorizontalOptions="Start" />
+               HorizontalOptions="Start"
+               Padding="20"/>
         <ScrollView>
             <Editor Text="empty"
                     FontSize="16"
                     IsReadOnly="True"
-                    HeightRequest="600"
+                    HeightRequest="500"
                     x:Name="excOutput"/>
         </ScrollView>
         <Button Text="да поебать мне"

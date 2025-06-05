@@ -73,7 +73,7 @@ async fn users_create(state: web::Data<AppState>, query: web::Query<UserParams>)
 /// http://127.0.0.1:8080/auth?username=my_username&password=my_password
 #[get("auth")]
 async fn auth(state: web::Data<AppState>, query: web::Query<UserParams>) -> impl Responder {
-    match sql::try_auth(query.0.username.clone(), query.0.username, &state.pool).await {
+    match sql::try_auth(query.0.username.clone(), query.0.password, &state.pool).await {
         Ok(token) => {
             return HttpResponse::Ok().body(token);
         },

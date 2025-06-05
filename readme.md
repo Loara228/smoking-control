@@ -20,5 +20,4 @@ Download [installer](https://www.postgresql.org/download/windows/) and run it
 create user usr with password 'password';
 CREATE DATABASE sc_db WITH OWNER = usr
 grant all privileges on database sc_db to usr;
-alter database db1 owner to usr;
 ```
