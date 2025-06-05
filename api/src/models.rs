@@ -9,6 +9,18 @@ pub struct User {
     pub time: i64
 }
 
+impl User {
+    pub fn create(username: String, password: String) -> Self {
+        Self {
+            id: 0,
+            username,
+            password,
+            token: None,
+            time: 0
+        }
+    }
+}
+
 pub struct UserData {
     pub id: i32,
     pub cig_per_day: i16,

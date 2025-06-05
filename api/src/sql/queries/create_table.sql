@@ -5,5 +5,5 @@ create table if not exists users(
     token character varying(64),
     time bigint not null,
 
-    unique(username, token)
+    unique(username)
 );
