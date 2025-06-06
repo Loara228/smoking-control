@@ -5,6 +5,8 @@ use tracing::level_filters::LevelFilter;
 mod sql;
 mod models;
 mod services;
+#[cfg(test)]
+mod tests;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -42,7 +44,7 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
-fn db_url() -> String {
+pub fn db_url() -> String {
     let user: &str = "usr";
     let password: &str = "password";
     let db_name: &str = "sc_db";
