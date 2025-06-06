@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 
 #[derive(Debug, FromRow)]
@@ -20,7 +20,7 @@ impl User {
     }
 }
 
-#[derive(Debug, FromRow, Serialize, PartialEq, Clone)]
+#[derive(Debug, FromRow, Serialize, PartialEq, Clone, Deserialize)]
 pub struct UserData {
     pub user_id: i32,
 

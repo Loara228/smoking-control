@@ -2,7 +2,7 @@ mod responses;
 mod query_params;
 
 use actix_web::*;
-use crate::{models::{User}, services::query_params::{TokenParam, UserParams}, sql, AppState};
+use crate::{models::{User, UserData}, services::query_params::{TokenParam, UserParams}, sql, AppState};
 
 #[get("/")]
 async fn index() -> impl Responder {
@@ -49,9 +49,8 @@ async fn users_get(state: web::Data<AppState>, request: HttpRequest) -> impl Res
 /// http://127.0.0.1:8080/users/create?username=my_username&password=my_password
 #[get("users/create")]
 async fn users_create(state: web::Data<AppState>, query: web::Query<UserParams>) -> HttpResponse {
-    return HttpResponse::InternalServerError().body("Not implemented yet");
 
-    // проверка логина и паролю на правильность ввода
+    // проверка логина и пароля на правильность ввода
 
     let new_user = User::create(query.username.clone(), query.password.clone());
     match sql::users::insert_user(new_user, &state.pool).await {
@@ -102,6 +101,33 @@ async fn get_user_data(state: web::Data<AppState>, query: web::Query<TokenParam>
                                 Some(data) => HttpResponse::Ok().json(data),
                                 None => HttpResponse::NotFound().body("not found"),
                             }
+                        },
+                        Err(_) => responses::internal_error(),
+                    }
+                },
+                None => responses::invalid_token(),
+            }
+        },
+        Err(e) => responses::internal_error(),
+    }
+}
+
+/// # Returns
+/// ```200``` success<br> 
+/// ```401``` invalid token
+/// ```500``` Error from sqlx
+/// 
+/// # Usage
+/// http://127.0.0.1:8080/users/data/set?token=token
+#[get("users/data/set")]
+async fn set_user_data(state: web::Data<AppState>, query_token: web::Query<TokenParam>, query_user: web::Query<UserData>) -> impl Responder {
+    match sql::get_id(query_token.token.clone(), &state.pool).await {
+        Ok(id) => {
+            match id {
+                Some(id) => {
+                    match sql::user_data::update_user_data(id, query_user.0, &state.pool).await {
+                        Ok(_) => {
+                            HttpResponse::Ok().body("success")
                         },
                         Err(_) => responses::internal_error(),
                     }

@@ -36,6 +36,9 @@ async fn main() -> std::io::Result<()> {
             
             .service(services::users_get)
             .service(services::users_create)
+
+            .service(services::get_user_data)
+            .service(services::set_user_data)
         
     })
     .bind(("0.0.0.0", 8080))?
