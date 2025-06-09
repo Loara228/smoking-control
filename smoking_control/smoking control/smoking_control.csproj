@@ -21,7 +21,7 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>smoking control</ApplicationTitle>
+		<ApplicationTitle>smoking_control</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.smokingcontrol</ApplicationId>

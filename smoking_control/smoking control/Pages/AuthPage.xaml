@@ -19,10 +19,19 @@
                x:Name="labelHint"
                IsVisible="False"/>
 
-        <Button Text="Войти"
+        <Button Text="Sign in"
                 x:Name="button1"
                 Clicked="Button_Clicked"/>
-        
+
+        <Label Text="Don't have an account yet?"
+               TextDecorations="Underline"
+               HorizontalOptions="End"
+               x:Name="labelSwitcher">
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
+            </Label.GestureRecognizers>
+        </Label>
+
         <ActivityIndicator IsVisible="False"
                            x:Name="activityIndicator"
                            HorizontalOptions="Center"

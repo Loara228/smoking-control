@@ -1,10 +1,12 @@
-update user_data
-    set cig_per_day = $2,
-    set cig_count = $3,
-    set cig_price = $4,
+update user_data set
 
-    set currency = $5,
+    cig_per_day = $2,
+    cig_count = $3,
+    cig_price = $4,
 
-    set interval = $6,
-    set last_input = $7;
+    currency = $5,
+
+    interval = $6,
+    last_input = $7
+
 where user_id = $1;

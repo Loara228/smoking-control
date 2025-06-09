@@ -18,9 +18,8 @@ pub async fn try_auth(username: String, password: String, pool: &Pool<Postgres>)
     match user {
         Some(user) => {
             const KEY: &str = "synTaverny";
-            let timestamp = std::time::SystemTime::now().duration_since(std::time::SystemTime::UNIX_EPOCH).unwrap().as_secs();
+            let hash = format!("{}{}", user.id, sha256::digest(format!("{}{}{KEY}", user.username, user.password)))[..64].to_owned();
 
-            let hash = sha256::digest(format!("{timestamp}{}{KEY}", user.password));
             sqlx::query("update users set token = $1 where id = $2")
                 .bind(hash.clone())
                 .bind(user.id)
@@ -53,8 +52,7 @@ pub mod users {
             .bind(user.username)
             .bind(user.password)
             .fetch_one(pool)
-            .await
-            .unwrap();
+            .await?;
     
         Ok(a)
     }

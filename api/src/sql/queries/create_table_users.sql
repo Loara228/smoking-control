@@ -1,8 +1,8 @@
 create table if not exists users(
     id serial PRIMARY KEY,
     username character varying(20) not null,
-    password character varying(64) not null,
-    token character varying(64),
+    password character(64) not null,
+    token character(64),
 
     unique(username)
 );

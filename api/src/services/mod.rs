@@ -1,6 +1,7 @@
 mod responses;
 mod query_params;
 
+use std::collections::HashSet;
 use actix_web::*;
 use crate::{models::{User, UserData}, services::query_params::{TokenParam, UserParams}, sql, AppState};
 
@@ -43,6 +44,7 @@ async fn users_get(state: web::Data<AppState>, request: HttpRequest) -> impl Res
 
 /// # Returns
 /// ```200``` Success<br>
+/// ```400``` Invalid format 
 /// ```409``` If a user with that name already exists
 /// 
 /// # Usage
@@ -50,14 +52,46 @@ async fn users_get(state: web::Data<AppState>, request: HttpRequest) -> impl Res
 #[get("users/create")]
 async fn users_create(state: web::Data<AppState>, query: web::Query<UserParams>) -> HttpResponse {
 
-    // проверка логина и пароля на правильность ввода
+    let username: &str = &query.username;
+    let password: &str = &query.password;
 
-    let new_user = User::create(query.username.clone(), query.password.clone());
+    let mut invalid = false;
+    
+    let chars: HashSet<char> = HashSet::from(['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '=', '[', '{', ']', '}', ';', ':', '<', '>', '|', '.', '/', '?', ',', '-']);
+    
+    if username.len() > 20 || username.len() < 2 {
+        invalid = true;
+    } else if password.len() > 50 || password.len() < 8 {
+        invalid = true;
+    }
+
+    if !invalid {
+        for c in username.chars() {
+            if !(c.is_ascii_alphanumeric() || chars.contains(&c)) {
+                invalid = true;
+                break;
+            }
+        }
+    }
+
+    if !invalid {
+        for c in password.chars() {
+            if !(c.is_ascii_alphanumeric() || chars.contains(&c)) {
+                invalid = true;
+                break;
+            }
+        }
+    }
+    if invalid {
+        return HttpResponse::BadRequest().body("failed");
+    }
+
+    let new_user = User::create(username,  &pwd_hash(password));
     match sql::users::insert_user(new_user, &state.pool).await {
         Ok(_) => {
             return HttpResponse::Ok().body("success");
         },
-        Err(_) => {
+        Err(e) => {
             return HttpResponse::Conflict().body("A user with that name already exists");
         },
     }
@@ -71,7 +105,7 @@ async fn users_create(state: web::Data<AppState>, query: web::Query<UserParams>)
 /// http://127.0.0.1:8080/auth?username=my_username&password=my_password
 #[get("auth")]
 async fn auth(state: web::Data<AppState>, query: web::Query<UserParams>) -> impl Responder {
-    match sql::try_auth(query.0.username.clone(), query.0.password, &state.pool).await {
+    match sql::try_auth(query.0.username.clone(), pwd_hash(&query.0.password), &state.pool).await {
         Ok(token) => {
             return HttpResponse::Ok().body(token);
         },
@@ -137,4 +171,8 @@ async fn set_user_data(state: web::Data<AppState>, query_token: web::Query<Token
         },
         Err(e) => responses::internal_error(),
     }
+}
+
+pub(crate) fn pwd_hash(input: &str) -> String {
+    sha256::digest(format!("{input}ыварфпавфрыпрыаврфаворфаврпфв"))
 }
