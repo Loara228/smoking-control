@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -36,6 +37,16 @@ namespace smoking_control.Api
         {
             var response = await Client.HttpClient.GetAsync(request);
             return (await response.Content.ReadAsStringAsync(), response.StatusCode);
+        }
+
+        protected List<(string k, string v)> ParamsFrom(object obj)
+        {
+            List<(string, string)> l = new List<(string, string)>();
+            foreach (FieldInfo field in obj.GetType().GetFields())
+            {
+                l.Add((field.Name, field.GetValue(obj)!.ToString()!));
+            }
+            return l;
         }
 
         protected APIClient Client

@@ -4,7 +4,7 @@ create table if not exists user_data (
     cig_count smallint not null,
     cig_price smallint not null,
 
-    currency character varying(3) not null,
+    currency varchar(4) not null,
 
     interval integer not null,
     last_input bigint not null,

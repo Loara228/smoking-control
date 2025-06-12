@@ -1,4 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+﻿using smoking_control.Api;
+using smoking_control.Models;
+using smoking_control.Pages;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace smoking_control
 {
@@ -7,25 +11,54 @@ namespace smoking_control
         public MainPage()
         {
             InitializeComponent();
-
-            Loaded += async (s, e) => {
-                var page = new Pages.AuthPage();
-                await Navigation.PushModalAsync(page);
-                page.Unloaded += (s, e) =>
-                {
-                    token = page.resultToken;
-                };
-
-            };
-            // 192.168.0.148:8080
+            _data = null!;
         }
 
-        private async void OnCounterClicked(object sender, EventArgs e)
+        protected override async void OnAppearing()
         {
-            label1.Text = token.ToString();
+            base.OnAppearing();
+
+            if (_initialized)
+                return;
+            _initialized = true;
+
+            var authPage = new AuthPage();
+            await Navigation.PushModalAsync(authPage);
+            authPage.Unloaded += async (s, e) =>
+            {
+                UserData? d = null;
+                try
+                {
+                    d = await APIClient.Current.DataModule.GetData();
+                }
+                catch(Exception exc1)
+                {
+                    await ErrorPage.DisplayError(this, exc1);
+                }
+                if (d == null)
+                {
+                    var dataPage = new UserDataEditorPage();
+                    await Navigation.PushModalAsync(dataPage);
+                    dataPage.Unloaded += async (s, e) =>
+                    {
+                        try
+                        {
+                            this._data = dataPage.CollectData();
+                            await APIClient.Current.DataModule.SetData(_data);
+                            await Task.Delay(500);
+                            _data = (await APIClient.Current.DataModule.GetData())!; // Not null. Additional check, id recv.
+                        }
+                        catch(Exception exc)
+                        {
+                            await ErrorPage.DisplayError(this, exc);
+                        }
+                    };
+                }
+            };
         }
 
-        private string token = "empty";
-    }
+        private bool _initialized = false;
+        private UserData _data;
 
+    }
 }

@@ -91,7 +91,7 @@ async fn users_create(state: web::Data<AppState>, query: web::Query<UserParams>)
         Ok(_) => {
             return HttpResponse::Ok().body("success");
         },
-        Err(e) => {
+        Err(_) => {
             return HttpResponse::Conflict().body("A user with that name already exists");
         },
     }
@@ -109,7 +109,7 @@ async fn auth(state: web::Data<AppState>, query: web::Query<UserParams>) -> impl
         Ok(token) => {
             return HttpResponse::Ok().body(token);
         },
-        Err(e) => {
+        Err(_) => {
             return responses::invalid_token();
         },
     }
@@ -142,7 +142,7 @@ async fn get_user_data(state: web::Data<AppState>, query: web::Query<TokenParam>
                 None => responses::invalid_token(),
             }
         },
-        Err(e) => responses::internal_error(),
+        Err(_) => responses::internal_error(),
     }
 }
 
@@ -169,10 +169,10 @@ async fn set_user_data(state: web::Data<AppState>, query_token: web::Query<Token
                 None => responses::invalid_token(),
             }
         },
-        Err(e) => responses::internal_error(),
+        Err(_) => responses::internal_error(),
     }
 }
 
 pub(crate) fn pwd_hash(input: &str) -> String {
-    sha256::digest(format!("{input}ыварфпавфрыпрыаврфаворфаврпфв"))
+    sha256::digest(format!("{input}ksjdhfsklddfhskfhskdhfjsdfsd"))
 }

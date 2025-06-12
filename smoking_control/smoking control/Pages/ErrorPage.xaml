@@ -19,7 +19,8 @@
                     HeightRequest="500"
                     x:Name="excOutput"/>
         </ScrollView>
-        <Button Text="да поебать мне"
-                Clicked="Button_Clicked"/>
+        <Button Text="poebat"
+                Clicked="Button_Clicked"
+                x:Name="btn"/>
     </VerticalStackLayout>
 </ContentPage>

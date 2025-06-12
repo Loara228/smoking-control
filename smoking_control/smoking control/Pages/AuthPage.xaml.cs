@@ -11,6 +11,7 @@ public partial class AuthPage : ContentPage
 		InitializeComponent();
 		textbox1.TextChanged += (s, e) => UnmarkInputs();
 		textbox2.TextChanged += (s, e) => UnmarkInputs();
+        textbox2.Completed += (s, e) => Button_Clicked(s, e);
 	}
 
     private async void Button_Clicked(object sender, EventArgs e)
@@ -58,7 +59,7 @@ public partial class AuthPage : ContentPage
 		}
 		catch(Exception e)
 		{
-			await Navigation.PushModalAsync(new ErrorPage(e));
+			await Navigation.PushModalAsync(new ErrorPage(e, false));
 		}
 		return false;
     }
@@ -71,12 +72,12 @@ public partial class AuthPage : ContentPage
         }
         catch (ApiException e)
         {
-            await Navigation.PushModalAsync(new ErrorPage(e));
+            await Navigation.PushModalAsync(new ErrorPage(e, false));
             return (false, "something wrong");
         }
         catch(Exception e)
         {
-            await Navigation.PushModalAsync(new ErrorPage(e));
+            await Navigation.PushModalAsync(new ErrorPage(e, false));
             return (false, "something wrong");
         }
     }
@@ -175,8 +176,6 @@ public partial class AuthPage : ContentPage
             }
         }
     }
-
-	public string resultToken = "empy";
 
     private PageType _curPageType;
 	private bool _marked;

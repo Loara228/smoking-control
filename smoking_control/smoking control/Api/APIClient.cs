@@ -15,7 +15,7 @@ namespace smoking_control.Api
             _httpClient = new HttpClient();
 
             AuthModule = new(this);
-
+            DataModule = new(this);
         }
 
         // Для обращения с любой части кода
@@ -23,8 +23,6 @@ namespace smoking_control.Api
         {
             get => _current;
         }
-
-        public AuthenticationModule AuthModule { get; private set; }
 
         public string Token
         {
@@ -40,6 +38,9 @@ namespace smoking_control.Api
             }
 
         }
+
+        public AuthenticationModule AuthModule { get; private set; }
+        public DataModule DataModule { get; private set; }
 
         internal HttpClient HttpClient { get => _httpClient; }
 

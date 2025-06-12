@@ -105,9 +105,9 @@ pub mod user_data {
             .await?;
 
         match id {
-            Some(id) => {
+            Some(_) => {
                 sqlx::query(include_str!("./queries/update_user_data.sql"))
-                    .bind(data.user_id)
+                    .bind(user_id)
                     .bind(data.cig_per_day)
                     .bind(data.cig_count)
                     .bind(data.cig_price)
@@ -119,7 +119,7 @@ pub mod user_data {
             },
             None => {
                 sqlx::query(include_str!("./queries/insert_user_data.sql"))
-                    .bind(data.user_id)
+                    .bind(user_id)
                     .bind(data.cig_per_day)
                     .bind(data.cig_count)
                     .bind(data.cig_price)
