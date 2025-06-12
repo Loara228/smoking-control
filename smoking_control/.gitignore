@@ -362,5 +362,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Fonts
-Fonts/
+/smoking control/Resources/Fonts/FluentUI.cs
+/smoking control/Resources/Fonts/OpenSans-Regular.ttf
+/smoking control/Resources/Fonts/OpenSans-Semibold.ttf
