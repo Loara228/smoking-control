@@ -11,3 +11,9 @@ pub struct UserParams {
 pub struct TokenParam {
     pub token: String
 }
+
+
+#[derive(Deserialize)]
+pub struct IdParam {
+    pub id: i32
+}

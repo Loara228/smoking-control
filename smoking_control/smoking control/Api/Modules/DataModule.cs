@@ -1,10 +1,10 @@
-﻿using smoking_control.Models;
+﻿using Newtonsoft.Json;
+using smoking_control.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace smoking_control.Api.Modules
@@ -22,7 +22,7 @@ namespace smoking_control.Api.Modules
             if (response.code == HttpStatusCode.NotFound)
                 return null;
             else if (response.code == HttpStatusCode.OK)
-                return JsonSerializer.Deserialize<UserData>(response.content);
+                return JsonConvert.DeserializeObject<UserData>(response.content);
             throw new ApiException(response);
         }
 

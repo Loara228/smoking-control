@@ -22,7 +22,7 @@ async fn api_test() {
     delete_test_user(&pool).await;
 
     let user = User::create(TEST_USERNAME, &crate::services::pwd_hash(TEST_PASSWORD));
-    let id = sql::users::insert_user(user, &pool).await.unwrap();
+    let id = sql::users::insert_user(&user, &pool).await.unwrap();
     println!("Создан тестовый пользователь c ID: {id}");
     let token = sql::try_auth(TEST_USERNAME.to_owned(), crate::services::pwd_hash(TEST_PASSWORD), &pool).await.unwrap();
     println!("token: {token}");
@@ -47,9 +47,9 @@ async fn api_test() {
         last_input: 1000000000_i64
     };
 
-    sql::user_data::update_user_data(id, data.clone(), &pool).await.unwrap();
+    sql::user_data::update_user_data(id, &data, &pool).await.unwrap();
     println!("Данные пользователя созданы");
-    sql::user_data::update_user_data(id, data.clone(), &pool).await.unwrap();
+    sql::user_data::update_user_data(id, &data, &pool).await.unwrap();
     println!("Данные пользователя обновлены");
 
     let data2 = sql::user_data::get_user_data(id, &pool).await.unwrap().unwrap();

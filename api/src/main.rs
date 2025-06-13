@@ -39,6 +39,8 @@ async fn main() -> std::io::Result<()> {
 
             .service(services::get_user_data)
             .service(services::set_user_data)
+
+            .service(services::log_add)
         
     })
     .bind(("0.0.0.0", 8080))?
@@ -53,24 +55,3 @@ pub fn db_url() -> String {
     let db_name: &str = "sc_db";
     format!("postgres://{user}:{password}@localhost:5432/{db_name}")
 }
-
-//  天上太陽紅呀紅彤彤哎
-//  心中的太陽是毛澤東啊
-//  他領導我們得解放啊
-//  人民翻身當家做主人
-//  依呀依子哟喂 呀而呀子哟啊
-//  人民翻身當家做主人
-
-//  天上太陽紅呀紅彤彤哎
-//  心中的太陽是毛澤東啊
-//  他領導我們奮勇前進啊
-//  革命江山一呀片紅
-//  依呀依子哟喂 呀而呀子哟啊
-//  革命江山一呀片紅
-
-//  天上太陽紅呀紅彤彤哎
-//  心中的太陽是毛澤東啊
-//  他領導我們奮勇前進啊
-//  革命江山一呀一片紅
-//  嗖啦啦子 嗖啦啦子
-//  一呀一片紅哎

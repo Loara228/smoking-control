@@ -123,7 +123,7 @@ public class UserDataEditorPage : ContentPage
             return;
         if (_questions[_curIndex].Keyboard == Keyboard.Numeric)
         {
-            if (!Int16.TryParse(_textbox1.Text, out Int16 result))
+            if (!Int16.TryParse(_textbox1.Text, out Int16 result) || result <= 0)
             {
                 await DisplayAlert("incorrect value", "Check the input field", "OK");
                 return;
@@ -208,21 +208,39 @@ public class UserDataEditorPage : ContentPage
 
     public UserData CollectData()
     {
+        var cpd = Int16.Parse(_questions[0].InputText);
+        var cc = Int16.Parse(_questions[1].InputText);
+
+        if (cc < 1)
+            cc = 1;
+        else if (cc > 64)
+            cc = 64;
+
+        if (cpd < 1)
+            cpd = 1;
+        else if (cpd > 20)
+            cpd = 20;
+
+        float min = 15f;
+        float max = 140f;
+
         return new UserData()
         {
-            cig_per_day = Int16.Parse(_questions[0].InputText),
-            cig_count = Int16.Parse(_questions[1].InputText),
+            cig_per_day = cpd,
+            cig_count = cc,
             cig_price = Int16.Parse(_questions[2].InputText),
 
             currency = _questions[3].InputText,
+
+            interval = (int)(TimeSpan.FromMinutes(max - (cpd - 1f) * (max - min) / 19f).TotalSeconds)
         };
     }
 
     private InputViewData[] _questions = [
-        new InputViewData("Сколько сигарет в день вы курите?", "10", "Нужно указать число") { Keyboard = Keyboard.Numeric},
-        new InputViewData("Сколько сигарет в одной пачке?", "20", "Нужно указать число") { Keyboard = Keyboard.Numeric},
-        new InputViewData("Сколько стоит одна пачка сигарет?", "150", "Нужно указать число") { Keyboard = Keyboard.Numeric},
-        new InputViewData("Какая у вас валюта?", "₽", "", "Можно указать не более трех сивмолов.\nНапример, $ или USD") { InputLength = 3 },
+        new InputViewData("How many cigarettes do you smoke per day?", "10", "You need to specify a number", "These data are needed to display your statistics\n1 - 20") { Keyboard = Keyboard.Numeric},
+        new InputViewData("How many cigarettes are in one pack?", "20", "You need to specify a number", "These data are needed to display your statistics\n1 - 64") { Keyboard = Keyboard.Numeric},
+        new InputViewData("How much does one pack of cigarettes cost?", "12", "You need to specify a number") { Keyboard = Keyboard.Numeric},
+        new InputViewData("What is your currency?", "₽", "", "You can specify no more than three characters.\nFor example, \"$\" or \"USD\".") { InputLength = 3 },
     ];
 
     const uint ANIM_TIME = 350;
@@ -239,7 +257,7 @@ public class UserDataEditorPage : ContentPage
 
 public class InputViewData
 {
-    public InputViewData(string quetsion, string displayText, string placeHolder, string? desc = "Эти данные нужны для отображения вашей статистики")
+    public InputViewData(string quetsion, string displayText, string placeHolder, string? desc = "These data are needed to display your statistics")
     {
         this.Question = quetsion;
         this.InputText = displayText;

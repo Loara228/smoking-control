@@ -47,6 +47,7 @@ namespace smoking_control
                             await APIClient.Current.DataModule.SetData(_data);
                             await Task.Delay(500);
                             _data = (await APIClient.Current.DataModule.GetData())!; // Not null. Additional check, id recv.
+                            OnLoaded();
                         }
                         catch(Exception exc)
                         {
@@ -54,7 +55,17 @@ namespace smoking_control
                         }
                     };
                 }
+                else
+                {
+                    _data = d;
+                    OnLoaded();
+                }
             };
+        }
+
+        private void OnLoaded()
+        {
+            labelTest.Text = _data.ToString();
         }
 
         private bool _initialized = false;

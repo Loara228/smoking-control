@@ -13,6 +13,17 @@ namespace smoking_control.Models
             currency = string.Empty;
         }
 
+        public override string ToString()
+        {
+            return $"user_id: {user_id}," +
+                $"cig_per_day: {cig_per_day}," +
+                $"cig_count: {cig_count}," +
+                $"cig_price: {cig_price}," +
+                $"currency: {currency}," +
+                $"interval: {interval}," +
+                $"last_input: {last_input}";
+        }
+
         public Int32 user_id;
 
         public Int16 cig_per_day;

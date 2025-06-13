@@ -2,8 +2,8 @@ mod responses;
 mod query_params;
 
 use std::collections::HashSet;
-use actix_web::*;
-use crate::{models::{User, UserData}, services::query_params::{TokenParam, UserParams}, sql, AppState};
+use actix_web::{web::Query, *};
+use crate::{models::{User, UserData}, services::query_params::{IdParam, TokenParam, UserParams}, sql, AppState};
 
 #[get("/")]
 async fn index() -> impl Responder {
@@ -87,7 +87,7 @@ async fn users_create(state: web::Data<AppState>, query: web::Query<UserParams>)
     }
 
     let new_user = User::create(username,  &pwd_hash(password));
-    match sql::users::insert_user(new_user, &state.pool).await {
+    match sql::users::insert_user(&new_user, &state.pool).await {
         Ok(_) => {
             return HttpResponse::Ok().body("success");
         },
@@ -159,10 +159,32 @@ async fn set_user_data(state: web::Data<AppState>, query_token: web::Query<Token
         Ok(id) => {
             match id {
                 Some(id) => {
-                    match sql::user_data::update_user_data(id, query_user.0, &state.pool).await {
+                    match sql::user_data::update_user_data(id, &query_user.0, &state.pool).await {
                         Ok(_) => {
                             HttpResponse::Ok().body("success")
                         },
+                        Err(_) => responses::internal_error(),
+                    }
+                },
+                None => responses::invalid_token(),
+            }
+        },
+        Err(_) => responses::internal_error(),
+    }
+}
+
+/// # Returns
+/// ```200``` success<br> 
+/// ```401``` invalid token
+/// ```500``` Error from sqlx
+#[get("logs/add")]
+async fn log_add(state: web::Data<AppState>, query_token: web::Query<TokenParam>) -> impl Responder {
+    match sql::get_id(query_token.token.clone(), &state.pool).await {
+        Ok(id_optiom) => {
+            match id_optiom {
+                Some(user_id) => {
+                    match sql::logs::insert_log(user_id, &state.pool).await {
+                        Ok(_) => HttpResponse::Ok().body("success"),
                         Err(_) => responses::internal_error(),
                     }
                 },

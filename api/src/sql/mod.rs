@@ -2,8 +2,9 @@ use sqlx::{Error, Pool, Postgres};
 use crate::models::User;
 
 pub async fn create_table(pool: &Pool<Postgres>) -> Result<(), Error> {
-    sqlx::query(include_str!("./queries/create_table_users.sql")).execute(pool).await?;
-    sqlx::query(include_str!("./queries/create_table_user_data.sql")).execute(pool).await?;
+    sqlx::query(include_str!("./queries/create_table_users.sql")).execute(pool).await.unwrap();
+    sqlx::query(include_str!("./queries/create_table_user_data.sql")).execute(pool).await.unwrap();
+    sqlx::query(include_str!("./queries/create_table_logs.sql")).execute(pool).await.unwrap();
 
     Ok(())
 }
@@ -43,14 +44,34 @@ pub async fn get_id(token: String, pool: &Pool<Postgres>) -> Result<Option<i32>,
     Ok(id)
 }
 
+pub mod logs {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    use sqlx::{Error, Pool, Postgres};
+
+    pub async fn insert_log(user_id: i32, pool: &Pool<Postgres>) -> Result<(), Error> {
+        let utc_now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as i64;
+
+        sqlx::query("INSERT INTO user_logs (user_id, time) VALUES ($1, $2);")
+            .bind(user_id)
+            .bind(utc_now)
+            .execute(pool)
+            .await?;
+
+        Ok(())
+    }
+}
+
 pub mod users {
     use crate::models::*;
     use sqlx::{Error, Pool, Postgres};
 
-    pub async fn insert_user(user: User, pool: &Pool<Postgres>) -> Result<i32, Error> {
+    pub async fn insert_user(user: &User, pool: &Pool<Postgres>) -> Result<i32, Error> {
         let a: i32 = sqlx::query_scalar("insert into users (username, password) values ($1, $2) returning id;")
-            .bind(user.username)
-            .bind(user.password)
+            .bind(user.username.clone())
+            .bind(user.password.clone())
             .fetch_one(pool)
             .await?;
     
@@ -98,7 +119,7 @@ pub mod user_data {
         Ok(())
     }
 
-    pub async fn update_user_data(user_id: i32, data: UserData, pool: &Pool<Postgres>) -> Result<(), Error> {
+    pub async fn update_user_data(user_id: i32, data: &UserData, pool: &Pool<Postgres>) -> Result<(), Error> {
         let id: Option<i32> = sqlx::query_scalar("select user_id from user_data where user_id = $1 limit 1;")
             .bind(user_id)
             .fetch_optional(pool)
@@ -111,7 +132,7 @@ pub mod user_data {
                     .bind(data.cig_per_day)
                     .bind(data.cig_count)
                     .bind(data.cig_price)
-                    .bind(data.currency)
+                    .bind(data.currency.clone())
                     .bind(data.interval)
                     .bind(data.last_input)
                     .execute(pool)
@@ -123,7 +144,7 @@ pub mod user_data {
                     .bind(data.cig_per_day)
                     .bind(data.cig_count)
                     .bind(data.cig_price)
-                    .bind(data.currency)
+                    .bind(data.currency.clone())
                     .bind(data.interval)
                     .bind(data.last_input)
                     .execute(pool)
