@@ -19,6 +19,12 @@
                x:Name="labelHint"
                IsVisible="False"/>
 
+        <StackLayout Orientation="Horizontal">
+            <CheckBox x:Name="cb1"/>
+            <Label Text="Remember me"
+                   VerticalOptions="Center"/>
+        </StackLayout>
+
         <Button Text="Sign in"
                 x:Name="button1"
                 Clicked="Button_Clicked"/>

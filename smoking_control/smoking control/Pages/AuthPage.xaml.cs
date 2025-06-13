@@ -6,18 +6,18 @@ namespace smoking_control.Pages;
 
 public partial class AuthPage : ContentPage
 {
-	public AuthPage()
-	{
-		InitializeComponent();
-		textbox1.TextChanged += (s, e) => UnmarkInputs();
-		textbox2.TextChanged += (s, e) => UnmarkInputs();
+    public AuthPage()
+    {
+        InitializeComponent();
+        textbox1.TextChanged += (s, e) => UnmarkInputs();
+        textbox2.TextChanged += (s, e) => UnmarkInputs();
         textbox2.Completed += (s, e) => Button_Clicked(s, e);
-	}
+    }
 
     private async void Button_Clicked(object sender, EventArgs e)
     {
-		if (!CheckFormat())
-		{
+        if (!CheckFormat())
+        {
             return;
         }
         SetActivity(loading: true);
@@ -28,6 +28,7 @@ public partial class AuthPage : ContentPage
             if (await Auth())
             {
                 await Navigation.PopModalAsync();
+                await SaveToken();
                 return;
             }
         }
@@ -37,6 +38,7 @@ public partial class AuthPage : ContentPage
             if (r.result)
             {
                 await Auth();
+                await SaveToken();
                 await Navigation.PopModalAsync();
                 return;
             }
@@ -47,21 +49,27 @@ public partial class AuthPage : ContentPage
         MarkInputs(message);
     }
 
-	private async Task<bool> Auth()
+    private async Task SaveToken()
     {
-		try
-		{
+        if (cb1.IsChecked)
+            await SecureStorage.Default.SetAsync("token", APIClient.Current.Token);
+    }
+
+    private async Task<bool> Auth()
+    {
+        try
+        {
             return await APIClient.Current.AuthModule.Auth(textbox1.Text.Trim(), textbox2.Text.Trim());
         }
-		catch(ApiException e)
-		{
-			return false;
-		}
-		catch(Exception e)
-		{
-			await Navigation.PushModalAsync(new ErrorPage(e, false));
-		}
-		return false;
+        catch (ApiException e)
+        {
+            return false;
+        }
+        catch (Exception e)
+        {
+            await Navigation.PushModalAsync(new ErrorPage(e, false));
+        }
+        return false;
     }
 
     private async Task<(bool result, string failMessage)> Register()
@@ -75,14 +83,14 @@ public partial class AuthPage : ContentPage
             await Navigation.PushModalAsync(new ErrorPage(e, false));
             return (false, "something wrong");
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             await Navigation.PushModalAsync(new ErrorPage(e, false));
             return (false, "something wrong");
         }
     }
 
-	private bool CheckFormat()
+    private bool CheckFormat()
     {
         const string USERNAME_PATTERN = @"^[A-Za-z0-9]+$";
         const string PASSWORD_PATTERN = @"^[a-zA-Z0-9!@#\$%\^&\*$$_\+=$$$$\{\};:<>\|./?,\-]+$";
@@ -110,35 +118,35 @@ public partial class AuthPage : ContentPage
         return true;
     }
 
-	private bool MarkInputs(string hint)
-	{
-		_marked = true;
-		labelHint.Text = hint;
-		labelHint.IsVisible = true;
+    private bool MarkInputs(string hint)
+    {
+        _marked = true;
+        labelHint.Text = hint;
+        labelHint.IsVisible = true;
 
         if (Application.Current?.Resources.TryGetValue("Error", out object color) == true)
         {
-			_tbColor = textbox1.TextColor;
+            _tbColor = textbox1.TextColor;
             textbox1.TextColor = (Color)color;
             textbox2.TextColor = (Color)color;
-		}
-		return false;
-	}
+        }
+        return false;
+    }
 
-	private void UnmarkInputs()
+    private void UnmarkInputs()
     {
-		if (_marked)
+        if (_marked)
         {
-			_marked = false;
+            _marked = false;
             labelHint.IsVisible = false;
-			textbox1.TextColor = _tbColor;
-			textbox2.TextColor = _tbColor;
+            textbox1.TextColor = _tbColor;
+            textbox2.TextColor = _tbColor;
         }
     }
 
-	private void SetActivity(bool loading)
-	{
-		activityIndicator.IsVisible = loading;
+    private void SetActivity(bool loading)
+    {
+        activityIndicator.IsVisible = loading;
         textbox1.IsEnabled = !loading;
         textbox2.IsEnabled = !loading;
         button1.IsVisible = !loading;
@@ -178,6 +186,6 @@ public partial class AuthPage : ContentPage
     }
 
     private PageType _curPageType;
-	private bool _marked;
-	private Color _tbColor = Colors.White;
+    private bool _marked;
+    private Color _tbColor = Colors.White;
 }

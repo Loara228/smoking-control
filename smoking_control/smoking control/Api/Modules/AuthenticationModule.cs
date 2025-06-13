@@ -29,6 +29,17 @@ namespace smoking_control.Api.Modules
             throw new ApiException(response);
         }
 
+        public async Task<bool> VerifyToken(string token)
+        {
+            var response = await GetResponse(BuildQuery("verify", [("token", token)]));
+
+            if (response.code == HttpStatusCode.OK)
+                return true;
+            else if (response.code == HttpStatusCode.Unauthorized)
+                return false;
+            throw new ApiException(response);
+        }
+
         [Obsolete("todo: html registration")]
         public async Task<(bool result, string failMessage)> Register(string username, string password)
         {

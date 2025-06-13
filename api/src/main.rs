@@ -33,6 +33,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(app_state.clone()))
             .service(services::index)
             .service(services::auth)
+            .service(services::verify_token)
             
             .service(services::users_get)
             .service(services::users_create)

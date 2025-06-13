@@ -174,14 +174,31 @@ async fn set_user_data(state: web::Data<AppState>, query_token: web::Query<Token
 }
 
 /// # Returns
+/// ```200``` id<br> 
+/// ```401``` invalid token
+/// ```500``` Error from sqlx
+#[get("verify")]
+async fn verify_token(state: web::Data<AppState>, query_token: web::Query<TokenParam>) -> impl Responder {
+    match sql::get_id(query_token.token.clone(), &state.pool).await {
+        Ok(id_option) => {
+            match id_option {
+                Some(user_id) => HttpResponse::Ok().body(user_id.to_string()),
+                None => responses::invalid_token(),
+            }
+        },
+        Err(_) => responses::internal_error(),
+    }
+}
+
+/// # Returns
 /// ```200``` success<br> 
 /// ```401``` invalid token
 /// ```500``` Error from sqlx
 #[get("logs/add")]
 async fn log_add(state: web::Data<AppState>, query_token: web::Query<TokenParam>) -> impl Responder {
     match sql::get_id(query_token.token.clone(), &state.pool).await {
-        Ok(id_optiom) => {
-            match id_optiom {
+        Ok(id_option) => {
+            match id_option {
                 Some(user_id) => {
                     match sql::logs::insert_log(user_id, &state.pool).await {
                         Ok(_) => HttpResponse::Ok().body("success"),
