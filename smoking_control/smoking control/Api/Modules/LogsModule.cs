@@ -42,5 +42,19 @@ namespace smoking_control.Api.Modules
 
             in_list = JsonConvert.DeserializeObject<List<UserLog>>(response.content);
         }
+
+        /// <returns>today's logs</returns>
+        public async Task<long> GetLogsToday(int timeOffset)
+        {
+            if (timeOffset < -12 || timeOffset > 12)
+                throw new ArgumentOutOfRangeException(nameof(timeOffset));
+
+            var response = await GetResponse(BuildQuery("logs/today", [("token", Client.Token), ("timezone", timeOffset.ToString())]));
+
+            if (response.code != System.Net.HttpStatusCode.OK)
+                throw new ApiException(response);
+
+            return long.Parse(response.content);
+        }
     }
 }

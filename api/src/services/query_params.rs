@@ -27,3 +27,8 @@ pub struct GetLogsParam {
     pub start: i32, // offset
     pub count: i32  // limit
 }
+
+#[derive(Deserialize)]
+pub struct TimeZoneParam {
+    pub timezone: i32
+}

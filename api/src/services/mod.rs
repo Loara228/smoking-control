@@ -3,7 +3,7 @@ mod query_params;
 
 use std::collections::HashSet;
 use actix_web::{web::Query, *};
-use crate::{models::{User, UserData}, services::query_params::{GetLogsParam, IdParam, TimeParam, TokenParam, UserParams}, sql, AppState};
+use crate::{models::{User, UserData}, services::query_params::{GetLogsParam, IdParam, TimeParam, TimeZoneParam, TokenParam, UserParams}, sql, AppState};
 
 #[get("/")]
 async fn index() -> impl Responder {
@@ -241,6 +241,31 @@ async fn get_logs(state: web::Data<AppState>, query_token: web::Query<TokenParam
                         Ok(logs) => {
                             HttpResponse::Ok().json(logs)
                         },
+                        Err(_) => responses::internal_error(),
+                    }
+                },
+                None => responses::invalid_token(),
+            }
+        },
+        Err(_) => responses::internal_error(),
+    }
+}
+
+/// # Returns
+/// ```200``` count (i64)<br> 
+/// ```401``` invalid token<br>
+/// ```500``` Error from sqlx
+#[get("logs/today")]
+async fn get_logs_today(state: web::Data<AppState>, query_token: web::Query<TokenParam>, query: web::Query<TimeZoneParam>) -> impl Responder {
+    if query.timezone < -12 || query.timezone > 12 {
+        return HttpResponse::BadRequest().body("OutOfRange(timezone)");
+    }
+    match sql::get_id(query_token.token.clone(), &state.pool).await {
+        Ok(user_option) => {
+            match user_option {
+                Some(user_id) => {
+                    match sql::logs::get_today_log_count(user_id, query.timezone, &state.pool).await {
+                        Ok(count) => HttpResponse::Ok().body(count.to_string()),
                         Err(_) => responses::internal_error(),
                     }
                 },

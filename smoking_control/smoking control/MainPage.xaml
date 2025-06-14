@@ -52,8 +52,8 @@
                        VerticalOptions="Center"/>
             </HorizontalStackLayout>
             
-            <BoxView Color="Black"
-                     Grid.Row="5"/>
+            <!--<BoxView Color="Black"
+                     Grid.Row="5"/>-->
             <Button Text="Add log"
                     Grid.Row="6"
                     Clicked="Button_Clicked"/>

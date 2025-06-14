@@ -64,6 +64,17 @@ pub mod logs {
         Ok(())
     }
 
+    pub async fn get_today_log_count(user_id: i32, time_zone: i32, pool: &Pool<Postgres>) -> Result<i64, Error> {
+        let tz = format!("UTC+{time_zone}");
+        let count: i64 = sqlx::query_scalar(include_str!("./queries/logs_count.sql"))
+            .bind(user_id)
+            .bind(tz)
+            .fetch_one(pool)
+            .await?;
+
+        Ok(count)
+    }
+
     pub async fn get_logs(user_id: i32, start: i32, count: i32, pool: &Pool<Postgres>) -> Result<Vec<UserLog>, Error> {
         Ok(sqlx::query_as::<_, UserLog>(include_str!("./queries/get_logs.sql"))
             .bind(user_id)

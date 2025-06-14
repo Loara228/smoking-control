@@ -84,8 +84,10 @@ namespace smoking_control
                     {
                         this._data = dataPage.CollectData();
                         await APIClient.Current.DataModule.SetData(_data);
-                        await Task.Delay(500);
+                        await Task.Delay(100);
                         _data = (await APIClient.Current.DataModule.GetData())!; // Not null. Additional check, id recv.
+                        await Task.Delay(100);
+                        _logsToday = (Int32)(await APIClient.Current.LogsModule.GetLogsToday(DateTimeOffset.Now.Offset.Hours));
                         OnLoaded();
                     }
                     catch (Exception exc)
@@ -97,6 +99,8 @@ namespace smoking_control
             else
             {
                 this._data = d;
+                await Task.Delay(100);
+                _logsToday = (Int32)(await APIClient.Current.LogsModule.GetLogsToday(DateTimeOffset.Now.Offset.Hours));
                 OnLoaded();
             }
         }
@@ -158,6 +162,7 @@ namespace smoking_control
         {
             _lastInput = DateTimeOffset.FromUnixTimeSeconds(_data.last_input).DateTime;
             _nextInput = _lastInput.Add(TimeSpan.FromSeconds(_data.interval));
+            labelCounter.Text = _logsToday.ToString();
 
         }
 
@@ -165,6 +170,7 @@ namespace smoking_control
         {
             var input = await APIClient.Current.LogsModule.AddLog();
             _data.last_input = input;
+            ++_logsToday;
             UpdateLog();
         }
 

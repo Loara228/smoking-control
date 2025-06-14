@@ -43,6 +43,7 @@ async fn main() -> std::io::Result<()> {
 
             .service(services::log_add)
             .service(services::get_logs)
+            .service(services::get_logs_today)
         
     })
     .bind(("0.0.0.0", 8081))?
