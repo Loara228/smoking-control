@@ -42,12 +42,20 @@ async fn main() -> std::io::Result<()> {
             .service(services::set_user_data)
 
             .service(services::log_add)
+            .service(services::get_logs)
         
     })
-    .bind(("0.0.0.0", 8080))?
+    .bind(("0.0.0.0", 8081))?
     // .bind(("127.0.0.1", 8080))?
     .run()
     .await
+}
+
+// unix utc time
+pub fn cur_time() -> Result<i64, std::time::SystemTimeError> {
+    Ok(std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)?
+            .as_secs() as i64)
 }
 
 pub fn db_url() -> String {

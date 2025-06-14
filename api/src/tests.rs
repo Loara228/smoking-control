@@ -58,6 +58,9 @@ async fn api_test() {
     assert_eq!(data, data2);
     println!("Данные не повредились");
 
+    sql::logs::insert_log(data.user_id, 0, &pool).await.unwrap();
+    sql::logs::get_logs(data.user_id, 0, 10, &pool).await.unwrap();
+
     sql::users::delete_user(id, &pool).await.unwrap();
     sql::user_data::delete_user_data(id, &pool).await.unwrap();
     println!("Пользователь и его данные удалены");

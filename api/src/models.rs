@@ -33,3 +33,10 @@ pub struct UserData {
     pub interval: i32,          // seconds
     pub last_input: i64,
 }
+
+#[derive(FromRow, Serialize)]
+pub struct UserLog {
+    pub id: i32,
+    pub user_id: i32,
+    pub time: i64,
+}

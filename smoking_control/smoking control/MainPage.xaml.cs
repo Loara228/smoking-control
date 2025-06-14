@@ -8,20 +8,32 @@ namespace smoking_control
 {
     public partial class MainPage : ContentPage
     {
+        #region ctor, loading
         public MainPage()
         {
-            InitializeComponent();
+            Content = new ActivityIndicator()
+            {
+                IsRunning = true,
+            };
             _data = null!;
+            _logs = new List<UserLog>();
         }
 
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-
             if (_initialized)
                 return;
             _initialized = true;
 
+            await Authorization();
+        }
+
+        /// <summary>
+        /// Trying to authorize via saved token. Or pages::AuthPage
+        /// </summary>
+        private async Task Authorization()
+        {
             string? savedToken = await SecureStorage.Default.GetAsync("token");
             if (savedToken != null)
             {
@@ -34,7 +46,7 @@ namespace smoking_control
                         return;
                     }
                 }
-                catch(Exception exc)
+                catch (Exception exc)
                 {
                     await ErrorPage.DisplayError(this, exc);
                 }
@@ -89,13 +101,81 @@ namespace smoking_control
             }
         }
 
+        #endregion
+
+        /// <summary>
+        /// xaml init. It is called after authorization and 
+        /// </summary>
         private void OnLoaded()
         {
-            labelTest.Text = _data.ToString();
+            InitializeComponent();
+
+            UpdateLog();
+
+            MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                for(;;)
+                {
+                    await Task.Delay(1000);
+                    if (_data.last_input == 0 && layoutElapsed.IsVisible)
+                    {
+                        layoutElapsed.IsVisible = false;
+                        layoutCd.IsVisible = false;
+                    }
+                    else
+                    {
+                        if (!layoutElapsed.IsVisible)
+                        {
+                            layoutElapsed.IsVisible = true;
+                            layoutCd.IsVisible = true;
+                        }
+
+                        labelElapsed.Text = FormattedTimeSpan(DateTime.UtcNow - _lastInput);
+                        labelCd.Text = FormattedTimeSpan(_nextInput - DateTime.UtcNow);
+                    }
+                }
+            });
         }
 
-        private bool _initialized = false;
-        private UserData _data;
+        private string FormattedTimeSpan(TimeSpan ts)
+        {
+            char sn(int v)
+            {
+                if (v > 1)
+                    return 's';
+                return ' ';
 
+            }
+
+            string d = ts.Days > 0 ? $" {ts.Days} day{sn(ts.Days)}" : "";
+            string h = ts.Hours > 0 ? $" {ts.Hours} hour{sn(ts.Hours)}" : "";
+            string m = ts.Minutes > 0 ? $" {ts.Minutes} minute{sn(ts.Minutes)}" : "";
+            string s = ts.Seconds > 0 ? $" {ts.Seconds} second{sn(ts.Seconds)}" : "";
+            return $"{d}{h}{m}{s}";
+        }
+
+        private void UpdateLog()
+        {
+            _lastInput = DateTimeOffset.FromUnixTimeSeconds(_data.last_input).DateTime;
+            _nextInput = _lastInput.Add(TimeSpan.FromSeconds(_data.interval));
+
+        }
+
+        private async void Button_Clicked(object sender, EventArgs e)
+        {
+            var input = await APIClient.Current.LogsModule.AddLog();
+            _data.last_input = input;
+            UpdateLog();
+        }
+
+        private UserData _data;
+        private List<UserLog> _logs; // todo
+
+        private bool _initialized = false;
+
+        private DateTime _lastInput;
+        private DateTime _nextInput;
+
+        private int _logsToday = 0; // todo
     }
 }

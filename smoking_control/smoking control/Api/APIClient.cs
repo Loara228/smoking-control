@@ -16,6 +16,7 @@ namespace smoking_control.Api
 
             AuthModule = new(this);
             DataModule = new(this);
+            LogsModule = new(this);
         }
 
         // Для обращения с любой части кода
@@ -39,6 +40,7 @@ namespace smoking_control.Api
 
         }
 
+        public LogsModule LogsModule { get; private set; }
         public AuthenticationModule AuthModule { get; private set; }
         public DataModule DataModule { get; private set; }
 
@@ -52,7 +54,7 @@ namespace smoking_control.Api
         // if http <application android:usesCleartextTraffic="true"></application>
         internal const string PROTOCOL = "http";
         internal const string HOSTNAME = "192.168.0.148";
-        internal const ushort PORT = 8080;
+        internal const ushort PORT = 8081;
     }
 
     public class ApiException : Exception

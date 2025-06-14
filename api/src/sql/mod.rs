@@ -45,22 +45,32 @@ pub async fn get_id(token: String, pool: &Pool<Postgres>) -> Result<Option<i32>,
 }
 
 pub mod logs {
-    use std::time::{SystemTime, UNIX_EPOCH};
     use sqlx::{Error, Pool, Postgres};
+    use crate::models::UserLog;
 
-    pub async fn insert_log(user_id: i32, pool: &Pool<Postgres>) -> Result<(), Error> {
-        let utc_now = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_secs() as i64;
+    pub async fn insert_log(user_id: i32, utc_time: i64, pool: &Pool<Postgres>) -> Result<(), Error> {
+        sqlx::query("update user_data set last_input = $2 where user_id = $1;")
+            .bind(user_id)
+            .bind(utc_time)
+            .execute(pool)
+            .await?;
 
         sqlx::query("INSERT INTO user_logs (user_id, time) VALUES ($1, $2);")
             .bind(user_id)
-            .bind(utc_now)
+            .bind(utc_time)
             .execute(pool)
             .await?;
 
         Ok(())
+    }
+
+    pub async fn get_logs(user_id: i32, start: i32, count: i32, pool: &Pool<Postgres>) -> Result<Vec<UserLog>, Error> {
+        Ok(sqlx::query_as::<_, UserLog>(include_str!("./queries/get_logs.sql"))
+            .bind(user_id)
+            .bind(start)
+            .bind(count)
+            .fetch_all(pool)
+            .await?)
     }
 }
 

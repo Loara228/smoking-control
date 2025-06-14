@@ -3,7 +3,7 @@ mod query_params;
 
 use std::collections::HashSet;
 use actix_web::{web::Query, *};
-use crate::{models::{User, UserData}, services::query_params::{IdParam, TokenParam, UserParams}, sql, AppState};
+use crate::{models::{User, UserData}, services::query_params::{GetLogsParam, IdParam, TimeParam, TokenParam, UserParams}, sql, AppState};
 
 #[get("/")]
 async fn index() -> impl Responder {
@@ -44,7 +44,7 @@ async fn users_get(state: web::Data<AppState>, request: HttpRequest) -> impl Res
 
 /// # Returns
 /// ```200``` Success<br>
-/// ```400``` Invalid format 
+/// ```400``` Invalid format<br>
 /// ```409``` If a user with that name already exists
 /// 
 /// # Usage
@@ -117,8 +117,8 @@ async fn auth(state: web::Data<AppState>, query: web::Query<UserParams>) -> impl
 
 /// # Returns
 /// ```200``` UserData as JSON<br> 
-/// ```401``` invalid token
-/// ```404``` data not found
+/// ```401``` invalid token<br>
+/// ```404``` data not found<br>
 /// ```500``` Error from sqlx
 /// 
 /// # Usage
@@ -148,7 +148,7 @@ async fn get_user_data(state: web::Data<AppState>, query: web::Query<TokenParam>
 
 /// # Returns
 /// ```200``` success<br> 
-/// ```401``` invalid token
+/// ```401``` invalid token<br>
 /// ```500``` Error from sqlx
 /// 
 /// # Usage
@@ -175,7 +175,7 @@ async fn set_user_data(state: web::Data<AppState>, query_token: web::Query<Token
 
 /// # Returns
 /// ```200``` id<br> 
-/// ```401``` invalid token
+/// ```401``` invalid token<br>
 /// ```500``` Error from sqlx
 #[get("verify")]
 async fn verify_token(state: web::Data<AppState>, query_token: web::Query<TokenParam>) -> impl Responder {
@@ -191,17 +191,56 @@ async fn verify_token(state: web::Data<AppState>, query_token: web::Query<TokenP
 }
 
 /// # Returns
-/// ```200``` success<br> 
-/// ```401``` invalid token
+/// ```200``` log time<br> 
+/// ```401``` invalid token<br>
 /// ```500``` Error from sqlx
 #[get("logs/add")]
-async fn log_add(state: web::Data<AppState>, query_token: web::Query<TokenParam>) -> impl Responder {
+async fn log_add(state: web::Data<AppState>, query_token: web::Query<TokenParam>, query_time: web::Query<TimeParam>) -> impl Responder {
+    let mut time = query_time.timestamp;
+    if time == 0 {
+        time = match crate::cur_time() {
+            Ok(r) => r,
+            Err(_) => {
+                return HttpResponse::BadRequest().body("timestamp");
+            },
+        }
+    } else if time < 0 {
+        return HttpResponse::BadRequest().body("timestamp");
+    }
+    
     match sql::get_id(query_token.token.clone(), &state.pool).await {
         Ok(id_option) => {
             match id_option {
                 Some(user_id) => {
-                    match sql::logs::insert_log(user_id, &state.pool).await {
-                        Ok(_) => HttpResponse::Ok().body("success"),
+                    match sql::logs::insert_log(user_id, time, &state.pool).await {
+                        Ok(_) => HttpResponse::Ok().body(time.to_string()),
+                        Err(_) => responses::internal_error(),
+                    }
+                },
+                None => responses::invalid_token(),
+            }
+        },
+        Err(_) => responses::internal_error(),
+    }
+}
+
+/// # Returns
+/// ```200``` logs as json<br> 
+/// ```401``` invalid token<br>
+/// ```500``` Error from sqlx
+#[get("logs/get")]
+async fn get_logs(state: web::Data<AppState>, query_token: web::Query<TokenParam>, query: web::Query<GetLogsParam>) -> impl Responder {
+    if query.count > 50 {
+        return HttpResponse::BadRequest().body("max count is 50");
+    }
+    match sql::get_id(query_token.token.clone(), &state.pool).await {
+        Ok(user_option) => {
+            match user_option {
+                Some(user_id) => {
+                    match sql::logs::get_logs(user_id, query.start, query.count, &state.pool).await {
+                        Ok(logs) => {
+                            HttpResponse::Ok().json(logs)
+                        },
                         Err(_) => responses::internal_error(),
                     }
                 },

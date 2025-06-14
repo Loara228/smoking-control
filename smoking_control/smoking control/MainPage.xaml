@@ -4,17 +4,68 @@
              x:Class="smoking_control.MainPage">
 
     <ScrollView>
-        <VerticalStackLayout
-            Padding="30,0"
-            Spacing="25">
+        <Grid Padding="30"
+              RowSpacing="25">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Label Text="Today's logs:"
+                   FontSize="28"
+                   HorizontalOptions="Center"
+                   Grid.Row="0"/>
             <Label x:Name="labelCounter"
                    Text="0"
-                   FontSize="32"
+                   FontSize="64"
                    FontAttributes="Bold"
                    HorizontalOptions="Center"
-                   VerticalOptions="Center"/>
+                   VerticalOptions="Center"
+                   Padding="30"
+                   Grid.Row="1"/>
+
+            <HorizontalStackLayout Grid.Row="2" Spacing="10" x:Name="layoutElapsed">
+                <Label Text="Elapsed:"
+                       TextColor="Gray"
+                       FontSize="12"
+                       VerticalOptions="Center"/>
+                <Label Text="TIME"
+                       x:Name="labelElapsed"
+                       VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout Grid.Row="3" Spacing="10" x:Name="layoutCd">
+                <Label Text="Left:"
+                       TextColor="Gray"
+                       FontSize="12"
+                       VerticalOptions="Center"/>
+                <Label Text="TIME"
+                       x:Name="labelCd"
+                       VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+            
+            <BoxView Color="Black"
+                     Grid.Row="5"/>
+            <Button Text="Add log"
+                    Grid.Row="6"
+                    Clicked="Button_Clicked"/>
+
+        </Grid>
+        <!--<VerticalStackLayout
+            Padding="30,0"
+            Spacing="25">
+            <Label Text="Elapsed: {TIME}"/>
+            
             <Label x:Name="labelTest"/>
-        </VerticalStackLayout>
+        </VerticalStackLayout>-->
     </ScrollView>
 
 </ContentPage>
