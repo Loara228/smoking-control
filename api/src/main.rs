@@ -31,6 +31,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(app_state.clone()))
+
             .service(services::index)
             .service(services::auth)
             .service(services::verify_token)
@@ -51,6 +52,7 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await
 }
+
 
 // unix utc time
 pub fn cur_time() -> Result<i64, std::time::SystemTimeError> {
