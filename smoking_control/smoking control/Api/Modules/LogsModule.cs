@@ -26,6 +26,14 @@ namespace smoking_control.Api.Modules
             return JsonConvert.DeserializeObject<UserLog>(response.content)!;
         }
 
+        public async Task DeleteLog(Int32 id)
+        {
+            var response = await GetResponse(BuildQuery("logs/delete", [("token", Client.Token), ("id", id.ToString())]));
+
+            if (response.code != System.Net.HttpStatusCode.OK)
+                throw new ApiException(response);
+        }
+
         public async Task<List<UserLog>> GetLogs(int start, int count)
         {
             List<UserLog> result = new List<UserLog>();

@@ -17,6 +17,7 @@
                     FontSize="16"
                     IsReadOnly="True"
                     HeightRequest="500"
+                    TextColor="#ebebff"
                     x:Name="excOutput"/>
         </ScrollView>
         <Button Text="poebat"

@@ -26,6 +26,12 @@ namespace smoking_control
             get; set;
         } = new ObservableCollection<UserLogVM>();
 
+        public static int LogsCounter
+        {
+            get; set;
+        } = 0;
+
         public static bool LogsUpdateRequired = false;
+        public static bool MainUpdateRequired = false;
     }
 }

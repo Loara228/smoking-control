@@ -15,6 +15,8 @@ public class LogsPage : ContentPage
 			HorizontalOptions = LayoutOptions.Center,
 			VerticalOptions = LayoutOptions.Center
 		};
+
+        App.Logs.CollectionChanged += Logs_CollectionChanged;
 	}
 
     protected override async void OnAppearing()
@@ -23,35 +25,87 @@ public class LogsPage : ContentPage
 
         if (!_initialized)
         {
-            _initialized = true;
-            await LoadLogs();
+            await Reload();
             InitUI();
+            _initialized = true;
         }
         if (App.LogsUpdateRequired)
         {
             App.LogsUpdateRequired = false;
-            await LoadLogs();
         }
     }
 
-    private async Task LoadLogs()
+    private async Task Reload()
     {
         App.Logs.Clear();
+        try
+        {
+            (await APIClient.Current.LogsModule.GetLogs(0, 50))
+                .Select(x => new UserLogVM(x))
+                .ToList()
+                .ForEach(x => App.Logs.Add(x));
+        }
+        catch(Exception exc)
+        {
+            await ErrorPage.DisplayError(this, exc);
+        }
+    }
 
-        (await APIClient.Current.LogsModule.GetLogs(0, 50))
-            .Select(x => new UserLogVM(x))
-            .ToList()
-            .ForEach(x => App.Logs.Add(x));
+    private async Task TryLoadMoreLogs()
+    {
+        try
+        {
+            (await APIClient.Current.LogsModule.GetLogs(App.Logs.Count, 50))
+                .Select(x => new UserLogVM(x))
+                .ToList()
+                .ForEach(x => App.Logs.Add(x));
+        }
+        catch (Exception exc)
+        {
+            await ErrorPage.DisplayError(this, exc);
+        }
+    }
+
+    private void Logs_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        if (!_initialized)
+            return;
     }
 
     private void InitUI()
     {
-        var btnUpdate = new Button() { Text = "Update" };
-        btnUpdate.Clicked += async (s, e) => { await LoadLogs(); };
+        var btnTextStyle = (Style)Application.Current!.Resources["ButtonText"];
+
+        var btnLoadMore = new Button() { 
+            Text = "Load",
+            Style = (Style)Application.Current!.Resources["ButtonText"],
+            HeightRequest = 50
+        };
+        var activityIndicator = new ActivityIndicator()
+        {
+            HeightRequest = 50,
+            WidthRequest = 50,
+            IsRunning = true,
+            IsVisible = false
+        };
+        btnLoadMore.Clicked += async (s, e) =>
+        {
+            btnLoadMore.IsVisible = false;
+            activityIndicator.IsVisible = true;
+            await Task.Delay(500);
+            await TryLoadMoreLogs();
+            btnLoadMore.IsVisible = true;
+            activityIndicator.IsVisible = false;
+        };
+
         Content = new ListView()
         {
+            Footer = new VerticalStackLayout()
+            {
+                Children = { btnLoadMore, activityIndicator }
+            },
+            SelectionMode = ListViewSelectionMode.None,
             ItemsSource = App.Logs,
-            Header = btnUpdate,
             ItemTemplate = new DataTemplate(() =>
             {
                 var grid = new Grid()
@@ -70,14 +124,32 @@ public class LogsPage : ContentPage
 
                 var label1 = new Label() { FontSize = 16, VerticalOptions = LayoutOptions.End, Padding = new Thickness(10, 0, 0, 0)};
                 var label2 = new Label() { FontSize = 13, VerticalOptions = LayoutOptions.Start, Padding = new Thickness(10, 0, 0, 0), TextColor = Colors.Gray };
-                var button1 = new Button() { Text = "Delete"};
+                var button1 = new Button() { Text = "Delete", Style = btnTextStyle };
 
                 label1.SetBinding(Label.TextProperty, "Elapsed");
                 label2.SetBinding(Label.TextProperty, "DateTimeFormatted");
 
                 button1.Clicked += async (s, e) =>
                 {
-                    UserLogVM item = ((s as Button)!.BindingContext as UserLogVM)!;
+                    UserLogVM log = ((s as Button)!.BindingContext as UserLogVM)!;
+                    try
+                    {
+                        try
+                        {
+                            await APIClient.Current.LogsModule.DeleteLog(log.Id);
+                        }
+                        catch (Exception exc)
+                        {
+                            await ErrorPage.DisplayError(this, exc);
+                        }
+                        App.Logs.Remove(log);
+                        --App.LogsCounter;
+                        App.MainUpdateRequired = true;
+                    }
+                    catch(Exception exc)
+                    {
+                        await ErrorPage.DisplayError(this, exc);
+                    }
                 };
 
                 grid.Add(label1, 0, 0);
@@ -115,6 +187,11 @@ public class UserLogVM
                 return "now";
             return formatted + " ago";
         }
+    }
+
+    public int Id
+    {
+        get => _logModel.id;
     }
 
     private UserLog _logModel;

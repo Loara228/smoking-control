@@ -14,6 +14,9 @@ namespace smoking_control
             Content = new ActivityIndicator()
             {
                 IsRunning = true,
+#if ANDROID
+                WidthRequest = 100,
+#endif
             };
             _data = null!;
         }
@@ -21,6 +24,11 @@ namespace smoking_control
         protected override async void OnAppearing()
         {
             base.OnAppearing();
+            if (App.MainUpdateRequired)
+            {
+                App.MainUpdateRequired = false;
+                UpdateLog();
+            }
             if (_initialized)
                 return;
             _initialized = true;
@@ -47,7 +55,7 @@ namespace smoking_control
                 }
                 catch (Exception exc)
                 {
-                    //await ErrorPage.DisplayError(this, exc);
+                    await ErrorPage.DisplayError(this, exc);
                 }
             }
 
@@ -86,7 +94,7 @@ namespace smoking_control
                         await Task.Delay(100);
                         _data = (await APIClient.Current.DataModule.GetData())!; // Not null. Additional check, id recv.
                         await Task.Delay(100);
-                        _logsToday = (Int32)(await APIClient.Current.LogsModule.GetLogsToday(DateTimeOffset.Now.Offset.Hours));
+                        App.LogsCounter = (Int32)(await APIClient.Current.LogsModule.GetLogsToday(DateTimeOffset.Now.Offset.Hours));
                         OnLoaded();
                     }
                     catch (Exception exc)
@@ -99,7 +107,14 @@ namespace smoking_control
             {
                 this._data = d;
                 await Task.Delay(100);
-                _logsToday = (Int32)(await APIClient.Current.LogsModule.GetLogsToday(DateTimeOffset.Now.Offset.Hours));
+                try
+                {
+                    App.LogsCounter = (Int32)(await APIClient.Current.LogsModule.GetLogsToday(DateTimeOffset.Now.Offset.Hours));
+                }
+                catch (Exception exc)
+                {
+                    await ErrorPage.DisplayError(this, exc);
+                }
                 OnLoaded();
             }
         }
@@ -148,16 +163,24 @@ namespace smoking_control
         {
             _lastInput = DateTimeOffset.FromUnixTimeSeconds(_data.last_input).DateTime;
             _nextInput = _lastInput.Add(TimeSpan.FromSeconds(_data.interval));
-            labelCounter.Text = _logsToday.ToString();
+            labelCounter.Text = App.LogsCounter.ToString();
         }
 
         private async void Button_Clicked(object sender, EventArgs e)
         {
-            var input = await APIClient.Current.LogsModule.AddLog();
+            UserLog input = null!;
+            try
+            {
+                input = await APIClient.Current.LogsModule.AddLog();
+            }
+            catch (Exception exc)
+            {
+                await ErrorPage.DisplayError(this, exc);
+            }
             _data.last_input = input.time;
-            App.Logs.Add(new UserLogVM(input));
-            App.LogsUpdateRequired = true;
-            ++_logsToday;
+            App.Logs.Insert(0, new UserLogVM(input));
+            //App.LogsUpdateRequired = true;
+            ++App.LogsCounter;
             UpdateLog();
         }
 
@@ -167,7 +190,5 @@ namespace smoking_control
 
         private DateTime _lastInput;
         private DateTime _nextInput;
-
-        private int _logsToday = 0;
     }
 }

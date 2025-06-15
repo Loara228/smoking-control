@@ -11,7 +11,7 @@ public partial class AuthPage : ContentPage
         InitializeComponent();
         textbox1.TextChanged += (s, e) => UnmarkInputs();
         textbox2.TextChanged += (s, e) => UnmarkInputs();
-        textbox2.Completed += (s, e) => Button_Clicked(s, e);
+        textbox2.Completed += (s, e) => Button_Clicked(s!, e);
     }
 
     private async void Button_Clicked(object sender, EventArgs e)
@@ -63,7 +63,7 @@ public partial class AuthPage : ContentPage
         {
             return await APIClient.Current.AuthModule.Auth(textbox1.Text.Trim(), textbox2.Text.Trim());
         }
-        catch (ApiException e)
+        catch (ApiException)
         {
             return false;
         }

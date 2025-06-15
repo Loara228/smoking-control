@@ -3,7 +3,7 @@ mod query_params;
 
 use std::collections::HashSet;
 use actix_web::*;
-use crate::{models::{User, UserData}, services::query_params::{GetLogsParam, TimeParam, TimeZoneParam, TokenParam, UserParams}, sql, AppState};
+use crate::{models::{User, UserData}, services::query_params::{GetLogsParam, IdParam, TimeParam, TimeZoneParam, TokenParam, UserParams}, sql, AppState};
 
 // #[derive(Deserialize)]
 // struct RegFormData {
@@ -251,6 +251,28 @@ async fn get_logs(state: web::Data<AppState>, query_token: web::Query<TokenParam
                         Ok(logs) => {
                             HttpResponse::Ok().json(logs)
                         },
+                        Err(_) => responses::internal_error(),
+                    }
+                },
+                None => responses::invalid_token(),
+            }
+        },
+        Err(_) => responses::internal_error(),
+    }
+}
+
+/// # Returns
+/// ```200``` success<br> 
+/// ```401``` invalid token<br>
+/// ```500``` Error from sqlx
+#[get("api/logs/delete")]
+async fn log_delete(state: web::Data<AppState>, query_token: web::Query<TokenParam>, query: web::Query<IdParam>) -> impl Responder {
+    match sql::get_id(query_token.token.clone(), &state.pool).await {
+        Ok(user_option) => {
+            match user_option {
+                Some(user_id) => {
+                    match sql::logs::delete_log(user_id, query.id, &state.pool).await {
+                        Ok(_) => HttpResponse::Ok().body("success"),
                         Err(_) => responses::internal_error(),
                     }
                 },

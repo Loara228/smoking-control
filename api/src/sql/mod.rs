@@ -66,6 +66,16 @@ pub mod logs {
         })
     }
 
+    pub async fn delete_log(user_id: i32, log_id: i32, pool: &Pool<Postgres>) -> Result<(), Error> {
+        sqlx::query("delete from user_logs where id = $1 and user_id = $2")
+            .bind(log_id)
+            .bind(user_id)
+            .execute(pool)
+            .await?;
+
+        Ok(())
+    }
+
     pub async fn get_today_log_count(user_id: i32, time_zone: i32, pool: &Pool<Postgres>) -> Result<i64, Error> {
         let tz = format!("UTC+{time_zone}");
         let count: i64 = sqlx::query_scalar(include_str!("./queries/logs_count.sql"))

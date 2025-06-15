@@ -15,5 +15,9 @@
     <ShellContent
         Title="Logs"
         ContentTemplate="{DataTemplate pages:LogsPage}"/>
-
+    <Shell.FlyoutFooter>
+        <Button Text="Sign out"
+                Clicked="Button_Clicked"
+                Style="{StaticResource ButtonText}"/>
+    </Shell.FlyoutFooter>
 </Shell>

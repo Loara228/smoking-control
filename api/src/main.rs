@@ -59,6 +59,7 @@ async fn main() -> std::io::Result<()> {
             .service(services::set_user_data)
 
             .service(services::log_add)
+            .service(services::log_delete)
             .service(services::get_logs)
             .service(services::get_logs_today)
         
