@@ -2,15 +2,25 @@ mod responses;
 mod query_params;
 
 use std::collections::HashSet;
-use actix_web::{web::Query, *};
-use crate::{models::{User, UserData}, services::query_params::{GetLogsParam, IdParam, TimeParam, TimeZoneParam, TokenParam, UserParams}, sql, AppState};
+use actix_web::*;
+use crate::{models::{User, UserData}, services::query_params::{GetLogsParam, TimeParam, TimeZoneParam, TokenParam, UserParams}, sql, AppState};
 
-#[get("/")]
-async fn index() -> impl Responder {
-    HttpResponse::Ok().body(
-        r#":p"#
-    )
-}
+// #[derive(Deserialize)]
+// struct RegFormData {
+//     username: String,
+//     email: String,
+//     password: String
+// }
+
+// #[post("/site/registration/post")]
+// pub async fn reg_post(form: web::Form<RegFormData>) -> impl Responder {
+//     tracing::info!("username: {}, email: {}, password: {}", form.username, form.email, form.password);
+//     println!("yo");
+//     // todo: reg_pending table.{user_id, email, ?}
+//     // regirect from email uri: {site/verify_email/?}
+//     // create user!
+//     HttpResponse::Ok().body("ok")
+// }
 
 /// # Returns
 /// ```200``` Username<br>

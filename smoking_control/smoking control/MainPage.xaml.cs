@@ -121,10 +121,14 @@ namespace smoking_control
                 for(;;)
                 {
                     await Task.Delay(1000);
-                    if (_data.last_input == 0 && layoutElapsed.IsVisible)
+                    if (_data.last_input == 0)
                     {
-                        layoutElapsed.IsVisible = false;
-                        layoutCd.IsVisible = false;
+                        if (layoutElapsed.IsVisible)
+                        {
+                            layoutElapsed.IsVisible = false;
+                            layoutCd.IsVisible = false;
+                        }
+                        continue;
                     }
                     else
                     {

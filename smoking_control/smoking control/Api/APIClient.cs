@@ -52,9 +52,9 @@ namespace smoking_control.Api
         private static APIClient _current = new APIClient();
 
         // if http <application android:usesCleartextTraffic="true"></application>
-        internal const string PROTOCOL = "http";
-        internal const string HOSTNAME = "192.168.0.148";
-        internal const ushort PORT = 8081;
+        internal static readonly string PROTOCOL = CONSTANTS.PROTOCOL;
+        internal static readonly string HOSTNAME = CONSTANTS.HOSTNAME;
+        internal static readonly ushort PORT = CONSTANTS.PORT;
     }
 
     public class ApiException : Exception

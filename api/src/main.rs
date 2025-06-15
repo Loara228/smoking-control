@@ -1,3 +1,5 @@
+use std::net::SocketAddrV4;
+
 use actix_web::{web, App, HttpServer};
 use sqlx::{PgPool, Pool, Postgres};
 use tracing::level_filters::LevelFilter;
@@ -25,6 +27,13 @@ impl AppState {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     tracing_subscriber::fmt().with_max_level(LevelFilter::INFO).init();
+
+    let ip = std::env::var("SERVER_IP").unwrap_or_else(|_| "127.0.0.1".to_owned());
+    let port = std::env::var("SERVER_port").unwrap_or_else(|_| "8080".to_owned());
+    let addr: SocketAddrV4 = format!("{ip}:{port}").parse().unwrap();
+
+    tracing::info!("{addr:?}");
+
     let app_state = AppState::new().await;
     sql::create_table(&app_state.pool).await.unwrap();
 
@@ -32,7 +41,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(app_state.clone()))
 
-            .service(services::index)
+            .service(actix_files::Files::new("/todo", "src/static"))
+
             .service(services::auth)
             .service(services::verify_token)
             
@@ -47,12 +57,10 @@ async fn main() -> std::io::Result<()> {
             .service(services::get_logs_today)
         
     })
-    .bind(("0.0.0.0", 8081))?
-    // .bind(("127.0.0.1", 8080))?
+    .bind(addr)?
     .run()
     .await
 }
-
 
 // unix utc time
 pub fn cur_time() -> Result<i64, std::time::SystemTimeError> {

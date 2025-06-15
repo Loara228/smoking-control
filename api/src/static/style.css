@@ -3,14 +3,14 @@ body {
     background-color: #f4f4f4;
     margin: 0;
     padding: 20px;
-}
-
-h3 {
-    text-align: center;
     color: #333;
 }
 
-form {
+h3, h1 {
+    text-align: center;
+}
+
+.card {
     background-color: #fff;
     padding: 20px;
     border-radius: 5px;
