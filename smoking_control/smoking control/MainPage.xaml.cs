@@ -16,7 +16,6 @@ namespace smoking_control
                 IsRunning = true,
             };
             _data = null!;
-            _logs = new List<UserLog>();
         }
 
         protected override async void OnAppearing()
@@ -48,7 +47,7 @@ namespace smoking_control
                 }
                 catch (Exception exc)
                 {
-                    await ErrorPage.DisplayError(this, exc);
+                    //await ErrorPage.DisplayError(this, exc);
                 }
             }
 
@@ -138,28 +137,11 @@ namespace smoking_control
                             layoutCd.IsVisible = true;
                         }
 
-                        labelElapsed.Text = FormattedTimeSpan(DateTime.UtcNow - _lastInput);
-                        labelCd.Text = FormattedTimeSpan(_nextInput - DateTime.UtcNow);
+                        labelElapsed.Text = (DateTime.UtcNow - _lastInput).AsFormattedString();
+                        labelCd.Text = (_nextInput - DateTime.UtcNow).AsFormattedString();
                     }
                 }
             });
-        }
-
-        private string FormattedTimeSpan(TimeSpan ts)
-        {
-            char sn(int v)
-            {
-                if (v > 1)
-                    return 's';
-                return ' ';
-
-            }
-
-            string d = ts.Days > 0 ? $" {ts.Days} day{sn(ts.Days)}" : "";
-            string h = ts.Hours > 0 ? $" {ts.Hours} hour{sn(ts.Hours)}" : "";
-            string m = ts.Minutes > 0 ? $" {ts.Minutes} minute{sn(ts.Minutes)}" : "";
-            string s = ts.Seconds > 0 ? $" {ts.Seconds} second{sn(ts.Seconds)}" : "";
-            return $"{d}{h}{m}{s}";
         }
 
         private void UpdateLog()
@@ -167,25 +149,25 @@ namespace smoking_control
             _lastInput = DateTimeOffset.FromUnixTimeSeconds(_data.last_input).DateTime;
             _nextInput = _lastInput.Add(TimeSpan.FromSeconds(_data.interval));
             labelCounter.Text = _logsToday.ToString();
-
         }
 
         private async void Button_Clicked(object sender, EventArgs e)
         {
             var input = await APIClient.Current.LogsModule.AddLog();
-            _data.last_input = input;
+            _data.last_input = input.time;
+            App.Logs.Add(new UserLogVM(input));
+            App.LogsUpdateRequired = true;
             ++_logsToday;
             UpdateLog();
         }
 
         private UserData _data;
-        private List<UserLog> _logs; // todo
 
         private bool _initialized = false;
 
         private DateTime _lastInput;
         private DateTime _nextInput;
 
-        private int _logsToday = 0; // todo
+        private int _logsToday = 0;
     }
 }

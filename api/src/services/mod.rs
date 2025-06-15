@@ -29,7 +29,7 @@ use crate::{models::{User, UserData}, services::query_params::{GetLogsParam, Tim
 /// 
 /// # Usage
 /// http://127.0.0.1:8080/users/get/1
-#[get("/users/get/{user_id}")]
+#[get("api//users/get/{user_id}")]
 async fn users_get(state: web::Data<AppState>, request: HttpRequest) -> impl Responder {
     match request.match_info().query("user_id").parse::<i32>() {
         Ok(id) => {
@@ -59,7 +59,7 @@ async fn users_get(state: web::Data<AppState>, request: HttpRequest) -> impl Res
 /// 
 /// # Usage
 /// http://127.0.0.1:8080/users/create?username=my_username&password=my_password
-#[get("users/create")]
+#[get("api/users/create")]
 async fn users_create(state: web::Data<AppState>, query: web::Query<UserParams>) -> HttpResponse {
 
     let username: &str = &query.username;
@@ -113,7 +113,7 @@ async fn users_create(state: web::Data<AppState>, query: web::Query<UserParams>)
 /// 
 /// # Usage
 /// http://127.0.0.1:8080/auth?username=my_username&password=my_password
-#[get("auth")]
+#[get("api/auth")]
 async fn auth(state: web::Data<AppState>, query: web::Query<UserParams>) -> impl Responder {
     match sql::try_auth(query.0.username.clone(), pwd_hash(&query.0.password), &state.pool).await {
         Ok(token) => {
@@ -133,7 +133,7 @@ async fn auth(state: web::Data<AppState>, query: web::Query<UserParams>) -> impl
 /// 
 /// # Usage
 /// http://127.0.0.1:8080/users/data/get?token=token
-#[get("/users/data/get")]
+#[get("api/users/data/get")]
 async fn get_user_data(state: web::Data<AppState>, query: web::Query<TokenParam>) -> impl Responder {
     match sql::get_id(query.token.clone(), &state.pool).await {
         Ok(id) => {
@@ -163,7 +163,7 @@ async fn get_user_data(state: web::Data<AppState>, query: web::Query<TokenParam>
 /// 
 /// # Usage
 /// http://127.0.0.1:8080/users/data/set?token=token
-#[get("users/data/set")]
+#[get("api/users/data/set")]
 async fn set_user_data(state: web::Data<AppState>, query_token: web::Query<TokenParam>, query_user: web::Query<UserData>) -> impl Responder {
     match sql::get_id(query_token.token.clone(), &state.pool).await {
         Ok(id) => {
@@ -187,7 +187,7 @@ async fn set_user_data(state: web::Data<AppState>, query_token: web::Query<Token
 /// ```200``` id<br> 
 /// ```401``` invalid token<br>
 /// ```500``` Error from sqlx
-#[get("verify")]
+#[get("api/verify")]
 async fn verify_token(state: web::Data<AppState>, query_token: web::Query<TokenParam>) -> impl Responder {
     match sql::get_id(query_token.token.clone(), &state.pool).await {
         Ok(id_option) => {
@@ -201,10 +201,10 @@ async fn verify_token(state: web::Data<AppState>, query_token: web::Query<TokenP
 }
 
 /// # Returns
-/// ```200``` log time<br> 
+/// ```200``` log as json<br> 
 /// ```401``` invalid token<br>
 /// ```500``` Error from sqlx
-#[get("logs/add")]
+#[get("api/logs/add")]
 async fn log_add(state: web::Data<AppState>, query_token: web::Query<TokenParam>, query_time: web::Query<TimeParam>) -> impl Responder {
     let mut time = query_time.timestamp;
     if time == 0 {
@@ -223,7 +223,7 @@ async fn log_add(state: web::Data<AppState>, query_token: web::Query<TokenParam>
             match id_option {
                 Some(user_id) => {
                     match sql::logs::insert_log(user_id, time, &state.pool).await {
-                        Ok(_) => HttpResponse::Ok().body(time.to_string()),
+                        Ok(log) => HttpResponse::Ok().json(log),
                         Err(_) => responses::internal_error(),
                     }
                 },
@@ -238,7 +238,7 @@ async fn log_add(state: web::Data<AppState>, query_token: web::Query<TokenParam>
 /// ```200``` logs as json<br> 
 /// ```401``` invalid token<br>
 /// ```500``` Error from sqlx
-#[get("logs/get")]
+#[get("api/logs/get")]
 async fn get_logs(state: web::Data<AppState>, query_token: web::Query<TokenParam>, query: web::Query<GetLogsParam>) -> impl Responder {
     if query.count > 50 {
         return HttpResponse::BadRequest().body("max count is 50");
@@ -265,7 +265,7 @@ async fn get_logs(state: web::Data<AppState>, query_token: web::Query<TokenParam
 /// ```200``` count (i64)<br> 
 /// ```401``` invalid token<br>
 /// ```500``` Error from sqlx
-#[get("logs/today")]
+#[get("api/logs/today")]
 async fn get_logs_today(state: web::Data<AppState>, query_token: web::Query<TokenParam>, query: web::Query<TimeZoneParam>) -> impl Responder {
     if query.timezone < -12 || query.timezone > 12 {
         return HttpResponse::BadRequest().body("OutOfRange(timezone)");

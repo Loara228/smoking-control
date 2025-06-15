@@ -16,18 +16,19 @@ namespace smoking_control.Api.Modules
         }
 
         /// <param name="utc_timestamp">0 - now</param>
-        public async Task<long> AddLog(long utc_timestamp = 0)
+        public async Task<UserLog> AddLog(long utc_timestamp = 0)
         {
             var response = await GetResponse(BuildQuery("logs/add", [("token", Client.Token), ("timestamp", utc_timestamp.ToString())]));
 
             if (response.code != System.Net.HttpStatusCode.OK)
                 throw new ApiException(response);
 
-            return long.Parse(response.content);
+            return JsonConvert.DeserializeObject<UserLog>(response.content)!;
         }
 
-        public async Task GetLogs(int start, int count, List<UserLog>? in_list)
+        public async Task<List<UserLog>> GetLogs(int start, int count)
         {
+            List<UserLog> result = new List<UserLog>();
             if (count > 50)
                 throw new ArgumentException("GetLogs limit");
 
@@ -40,7 +41,9 @@ namespace smoking_control.Api.Modules
             if (response.code != System.Net.HttpStatusCode.OK)
                 throw new ApiException(response);
 
-            in_list = JsonConvert.DeserializeObject<List<UserLog>>(response.content);
+            result = JsonConvert.DeserializeObject<List<UserLog>>(response.content)!;
+
+            return result;
         }
 
         /// <returns>today's logs</returns>

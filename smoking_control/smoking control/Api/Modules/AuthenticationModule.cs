@@ -12,7 +12,7 @@ namespace smoking_control.Api.Modules
         public AuthenticationModule(APIClient client) : base(client)
         {
 
-        }
+        }   
 
         public async Task<bool> Auth(string username, string password)
         {

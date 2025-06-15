@@ -28,8 +28,14 @@ impl AppState {
 async fn main() -> std::io::Result<()> {
     tracing_subscriber::fmt().with_max_level(LevelFilter::INFO).init();
 
-    let ip = std::env::var("SERVER_IP").unwrap_or_else(|_| "127.0.0.1".to_owned());
-    let port = std::env::var("SERVER_port").unwrap_or_else(|_| "8080".to_owned());
+    let ip = std::env::var("SERVER_IP").unwrap_or_else(|_| {
+        tracing::warn!("The standard local address is used");
+        "127.0.0.1".to_owned()
+    });
+    let port = std::env::var("SERVER_PORT").unwrap_or_else(|_| {
+        tracing::warn!("The standard port is used");
+        "8080".to_owned()
+    });
     let addr: SocketAddrV4 = format!("{ip}:{port}").parse().unwrap();
 
     tracing::info!("{addr:?}");
@@ -41,7 +47,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(app_state.clone()))
 
-            .service(actix_files::Files::new("/todo", "src/static"))
+            // .service(actix_files::Files::new("/", "src/static"))
 
             .service(services::auth)
             .service(services::verify_token)

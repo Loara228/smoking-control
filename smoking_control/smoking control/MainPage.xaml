@@ -37,7 +37,7 @@
                        TextColor="Gray"
                        FontSize="12"
                        VerticalOptions="Center"/>
-                <Label Text="TIME"
+                <Label Text="-"
                        x:Name="labelElapsed"
                        VerticalOptions="Center"/>
             </HorizontalStackLayout>
@@ -47,7 +47,7 @@
                        TextColor="Gray"
                        FontSize="12"
                        VerticalOptions="Center"/>
-                <Label Text="TIME"
+                <Label Text="-"
                        x:Name="labelCd"
                        VerticalOptions="Center"/>
             </HorizontalStackLayout>

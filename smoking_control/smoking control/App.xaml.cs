@@ -1,4 +1,7 @@
-﻿namespace smoking_control
+﻿using smoking_control.Pages;
+using System.Collections.ObjectModel;
+
+namespace smoking_control
 {
     public partial class App : Application
     {
@@ -17,5 +20,12 @@
 #endif
             };
         }
+
+        public static ObservableCollection<UserLogVM> Logs
+        {
+            get; set;
+        } = new ObservableCollection<UserLogVM>();
+
+        public static bool LogsUpdateRequired = false;
     }
 }

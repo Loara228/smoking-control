@@ -53,6 +53,8 @@ public partial class AuthPage : ContentPage
     {
         if (cb1.IsChecked)
             await SecureStorage.Default.SetAsync("token", APIClient.Current.Token);
+        else
+            SecureStorage.Default.Remove("token");
     }
 
     private async Task<bool> Auth()

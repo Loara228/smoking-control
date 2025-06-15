@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export SERVER_IP="0.0.0.0" # auto
+export SERVER_IP="127.0.0.1"
 export SERVER_HOSTNAME="127.0.0.1"
 export SERVER_PORT="8081"
 export SERVER_USE_SSL=false

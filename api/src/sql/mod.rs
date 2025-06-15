@@ -48,20 +48,22 @@ pub mod logs {
     use sqlx::{Error, Pool, Postgres};
     use crate::models::UserLog;
 
-    pub async fn insert_log(user_id: i32, utc_time: i64, pool: &Pool<Postgres>) -> Result<(), Error> {
+    pub async fn insert_log(user_id: i32, utc_time: i64, pool: &Pool<Postgres>) -> Result<UserLog, Error> {
         sqlx::query("update user_data set last_input = $2 where user_id = $1;")
             .bind(user_id)
             .bind(utc_time)
             .execute(pool)
             .await?;
 
-        sqlx::query("INSERT INTO user_logs (user_id, time) VALUES ($1, $2);")
+        let log_id: i32 = sqlx::query_scalar("INSERT INTO user_logs (user_id, time) VALUES ($1, $2) returning id;")
             .bind(user_id)
             .bind(utc_time)
-            .execute(pool)
+            .fetch_one(pool)
             .await?;
 
-        Ok(())
+        Ok(UserLog {
+            id: log_id, user_id: user_id, time: utc_time
+        })
     }
 
     pub async fn get_today_log_count(user_id: i32, time_zone: i32, pool: &Pool<Postgres>) -> Result<i64, Error> {
@@ -90,13 +92,13 @@ pub mod users {
     use sqlx::{Error, Pool, Postgres};
 
     pub async fn insert_user(user: &User, pool: &Pool<Postgres>) -> Result<i32, Error> {
-        let a: i32 = sqlx::query_scalar("insert into users (username, password) values ($1, $2) returning id;")
+        let new_user_id: i32 = sqlx::query_scalar("insert into users (username, password) values ($1, $2) returning id;")
             .bind(user.username.clone())
             .bind(user.password.clone())
             .fetch_one(pool)
             .await?;
     
-        Ok(a)
+        Ok(new_user_id)
     }
     
     pub async fn delete_user(id: i32, pool: &Pool<Postgres>) -> Result<(), Error> {
