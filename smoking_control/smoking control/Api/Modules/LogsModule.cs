@@ -54,6 +54,7 @@ namespace smoking_control.Api.Modules
             return result;
         }
 
+        /// <param name="timeOffset">HOURS</param>
         /// <returns>today's logs</returns>
         public async Task<long> GetLogsToday(int timeOffset)
         {

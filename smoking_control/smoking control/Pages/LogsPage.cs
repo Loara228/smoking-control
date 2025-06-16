@@ -176,7 +176,7 @@ public class UserLogVM
 
     public string DateTimeFormatted
     {
-        get => DateTimeOffset.FromUnixTimeSeconds(_logModel.time).DateTime.ToString("HH:mm\tdd.MM.yyyy");
+        get => (DateTimeOffset.FromUnixTimeSeconds(_logModel.time).DateTime).Add(DateTimeOffset.Now.Offset).ToString("HH:mm\tdd.MM.yyyy");
     }
 
     public string Elapsed

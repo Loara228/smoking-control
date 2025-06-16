@@ -77,12 +77,16 @@ pub mod logs {
     }
 
     pub async fn get_today_log_count(user_id: i32, time_zone: i32, pool: &Pool<Postgres>) -> Result<i64, Error> {
-        let tz = format!("UTC+{time_zone}");
-        let count: i64 = sqlx::query_scalar(include_str!("./queries/logs_count.sql"))
+        let tz = format!("{} hours", time_zone);
+        let count: i64 = sqlx::query_scalar(format!("SELECT COUNT(*) AS log_count
+FROM user_logs
+WHERE user_id = {user_id}
+AND to_timestamp(time) AT TIME ZONE 'UTC' + INTERVAL '{tz}' >= date_trunc('day', now() AT TIME ZONE 'UTC' + INTERVAL '{tz}')
+AND to_timestamp(time) AT TIME ZONE 'UTC' + INTERVAL '{tz}' < date_trunc('day', now() AT TIME ZONE 'UTC' + INTERVAL '{tz}') + interval '1 day';").as_str())
             .bind(user_id)
             .bind(tz)
             .fetch_one(pool)
-            .await?;
+            .await.unwrap();
 
         Ok(count)
     }
@@ -150,6 +154,16 @@ pub mod user_data {
             .await?;
 
         Ok(())
+    }
+
+    pub async fn increase_interval(user_id: i32, interval: i32, pool: &Pool<Postgres>) -> Result<i32, Error> {
+        let new_interval: i32 = sqlx::query_scalar("update user_data set interval = interval + $2 where user_id = $1 returning interval")
+            .bind(user_id)
+            .bind(interval)
+            .fetch_one(pool)
+            .await?;
+
+        Ok(new_interval)
     }
 
     pub async fn update_user_data(user_id: i32, data: &UserData, pool: &Pool<Postgres>) -> Result<(), Error> {

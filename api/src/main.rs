@@ -54,6 +54,7 @@ async fn main() -> std::io::Result<()> {
             
             .service(services::users_get)
             .service(services::users_create)
+            .service(services::users_inc_interval)
 
             .service(services::get_user_data)
             .service(services::set_user_data)

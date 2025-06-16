@@ -1,4 +1,5 @@
-﻿using smoking_control.Pages;
+﻿using smoking_control.Models;
+using smoking_control.Pages;
 using System.Collections.ObjectModel;
 
 namespace smoking_control
@@ -30,6 +31,11 @@ namespace smoking_control
         {
             get; set;
         } = 0;
+
+        public static UserData UsrData
+        {
+            get; set;
+        } = null!;
 
         public static bool LogsUpdateRequired = false;
         public static bool MainUpdateRequired = false;

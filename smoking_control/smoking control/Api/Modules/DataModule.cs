@@ -37,5 +37,15 @@ namespace smoking_control.Api.Modules
             else if (response.code != HttpStatusCode.OK)
                 throw new ApiException(response.content, response.code);
         }
+
+        /// <returns>new interval = cur_interval + seconds</returns>
+        public async Task<Int32> IncInterval(Int32 seconds)
+        {
+            var response = await GetResponse(BuildQuery("users/data/incinterval", [("token", Client.Token), ("interval", seconds.ToString())]));
+
+            if (response.code == HttpStatusCode.OK)
+                return Int32.Parse(response.content);
+            throw new ApiException(response);
+        }
     }
 }

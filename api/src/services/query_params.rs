@@ -32,3 +32,8 @@ pub struct GetLogsParam {
 pub struct TimeZoneParam {
     pub timezone: i32
 }
+
+#[derive(Deserialize)]
+pub struct IntervalParam {
+    pub interval: i32
+}

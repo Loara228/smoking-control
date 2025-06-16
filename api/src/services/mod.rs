@@ -3,7 +3,7 @@ mod query_params;
 
 use std::collections::HashSet;
 use actix_web::*;
-use crate::{models::{User, UserData}, services::query_params::{GetLogsParam, IdParam, TimeParam, TimeZoneParam, TokenParam, UserParams}, sql, AppState};
+use crate::{models::{User, UserData}, services::query_params::{GetLogsParam, IdParam, IntervalParam, TimeParam, TimeZoneParam, TokenParam, UserParams}, sql, AppState};
 
 // #[derive(Deserialize)]
 // struct RegFormData {
@@ -29,7 +29,7 @@ use crate::{models::{User, UserData}, services::query_params::{GetLogsParam, IdP
 /// 
 /// # Usage
 /// http://127.0.0.1:8080/users/get/1
-#[get("api//users/get/{user_id}")]
+#[get("api/users/get/{user_id}")]
 async fn users_get(state: web::Data<AppState>, request: HttpRequest) -> impl Responder {
     match request.match_info().query("user_id").parse::<i32>() {
         Ok(id) => {
@@ -49,6 +49,24 @@ async fn users_get(state: web::Data<AppState>, request: HttpRequest) -> impl Res
             }
         },
         Err(e) => responses::parse_failed(Box::new(e), "user_id")
+    }
+}
+
+#[get("api/users/data/incinterval")]
+async fn users_inc_interval(state: web::Data<AppState>, query_token: web::Query<TokenParam>, query: web::Query<IntervalParam>) -> impl Responder {
+    match sql::get_id(query_token.token.clone(), &state.pool).await {
+        Ok(id_option) => {
+            match id_option {
+                Some(user_id) => {
+                    match sql::user_data::increase_interval(user_id, query.interval, &state.pool).await {
+                        Ok(new_interval) => HttpResponse::Ok().body(new_interval.to_string()),
+                        Err(_) => responses::internal_error(),
+                    }
+                },
+                None => responses::invalid_token(),
+            }
+        },
+        Err(_) => responses::internal_error(),
     }
 }
 

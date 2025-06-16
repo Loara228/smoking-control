@@ -11,14 +11,22 @@ namespace smoking_control
         #region ctor, loading
         public MainPage()
         {
-            Content = new ActivityIndicator()
+            Content = new VerticalStackLayout()
             {
-                IsRunning = true,
+                new ActivityIndicator()
+                {
+                    IsRunning = true,
 #if ANDROID
-                WidthRequest = 100,
+                    WidthRequest = 100,
 #endif
+                },
+                new Label()
+                {
+                    Text = "Please wait...",
+                    TextColor = Colors.Gray,
+                    FontSize = 14,
+                }
             };
-            _data = null!;
         }
 
         protected override async void OnAppearing()
@@ -89,10 +97,10 @@ namespace smoking_control
                 {
                     try
                     {
-                        this._data = dataPage.CollectData();
-                        await APIClient.Current.DataModule.SetData(_data);
+                        App.UsrData = dataPage.CollectData();
+                        await APIClient.Current.DataModule.SetData(App.UsrData);
                         await Task.Delay(100);
-                        _data = (await APIClient.Current.DataModule.GetData())!; // Not null. Additional check, id recv.
+                        App.UsrData = (await APIClient.Current.DataModule.GetData())!; // Not null. Additional check, id recv.
                         await Task.Delay(100);
                         App.LogsCounter = (Int32)(await APIClient.Current.LogsModule.GetLogsToday(DateTimeOffset.Now.Offset.Hours));
                         OnLoaded();
@@ -105,7 +113,7 @@ namespace smoking_control
             }
             else
             {
-                this._data = d;
+                App.UsrData = d;
                 await Task.Delay(100);
                 try
                 {
@@ -135,7 +143,7 @@ namespace smoking_control
                 for(;;)
                 {
                     await Task.Delay(1000);
-                    if (_data.last_input == 0)
+                    if (App.UsrData.last_input == 0)
                     {
                         if (layoutElapsed.IsVisible)
                         {
@@ -161,30 +169,16 @@ namespace smoking_control
 
         private void UpdateLog()
         {
-            _lastInput = DateTimeOffset.FromUnixTimeSeconds(_data.last_input).DateTime;
-            _nextInput = _lastInput.Add(TimeSpan.FromSeconds(_data.interval));
+            _lastInput = DateTimeOffset.FromUnixTimeSeconds(App.UsrData.last_input).DateTime;
+            _nextInput = _lastInput.Add(TimeSpan.FromSeconds(App.UsrData.interval));
             labelCounter.Text = App.LogsCounter.ToString();
         }
 
         private async void Button_Clicked(object sender, EventArgs e)
         {
-            UserLog input = null!;
-            try
-            {
-                input = await APIClient.Current.LogsModule.AddLog();
-            }
-            catch (Exception exc)
-            {
-                await ErrorPage.DisplayError(this, exc);
-            }
-            _data.last_input = input.time;
-            App.Logs.Insert(0, new UserLogVM(input));
-            //App.LogsUpdateRequired = true;
-            ++App.LogsCounter;
-            UpdateLog();
+            var p = new LogAddPage();
+            await Navigation.PushModalAsync(p);
         }
-
-        private UserData _data;
 
         private bool _initialized = false;
 
