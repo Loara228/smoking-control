@@ -9,4 +9,4 @@
 source ./conf.sh
 
 cd ../api
-cargo run -- --addr $SRV_IP https --key $SRV_KEY --sert $SRV_SERT
+cargo run -- --addr $SRV_IP https --key $SRV_KEY --sert $SRV_CERT

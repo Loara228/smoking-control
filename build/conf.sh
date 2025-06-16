@@ -6,7 +6,7 @@ export SRV_PORT="8081"
 export SRV_USE_SSL=false
 
 export SRV_KEY="/home/user/code/smoking-control/build/secret/key.pem"
-export SRV_SERT="/home/user/code/smoking-control/build/secret/sert.pem"
+export SRV_CERT="/home/user/code/smoking-control/build/secret/sert.pem"
 
 
 echo "IP: $SRV_IP"

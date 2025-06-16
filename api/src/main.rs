@@ -44,8 +44,6 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(app_state.clone()))
 
-            // .service(actix_files::Files::new("/", "src/static"))
-
             .service(services::auth)
             .service(services::verify_token)
             
@@ -60,6 +58,8 @@ async fn main() -> std::io::Result<()> {
             .service(services::log_delete)
             .service(services::get_logs)
             .service(services::get_logs_today)
+
+            .service(actix_files::Files::new("/", "src/static").show_files_listing())
         
     });
 
