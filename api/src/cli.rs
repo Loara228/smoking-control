@@ -17,7 +17,10 @@ pub enum RunCommand {
         port: i32
     },
     HTTPS {
-        
+        #[arg(short, long, value_name = "PATH")]
+        key: String,
+        #[arg(short, long, value_name = "PATH")]
+        sert: String
     }
 }
 

@@ -16,10 +16,22 @@ The app displays the elapsed time since the last nicotine intake. It also shows 
 
 ## 🛠️ Steps to run:
 
-### PostgreSQL
+### Ubuntu (Ubuntu 24.04.2 LTS):
 
 ```bash
 sudo apt update
+sudp apt upgrade
+# c/C++ compiler
+sudo apt install gcc
+# open ssl
+sudo apt-get install pkg-config libssl-dev
+# rustc, cargo
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+### PostgreSQL
+
+```bash
 sudo apt install postgresql postgresql-contrib
 sudo systemctl start postgresql.service
 sudo -i -u postgres
@@ -28,12 +40,37 @@ psql
 
 ```sql
 create user usr with password 'password';
-CREATE DATABASE sc_db WITH OWNER = usr
+CREATE DATABASE sc_db WITH OWNER = usr;
 grant all privileges on database sc_db to usr;
+-- exit
+postgres=# \q
 ```
 
+### Clone and build
+
+```
+https://github.com/Loara228/smoking-control.git
+cd smoking-control
+cd build
+nano conf.sh
+```
+
+### Set up the launch configuration
+
+```txt
+export SRV_IP="0.0.0.0"				# auto
+export SRV_HOSTNAME="192.168.0.148"	# for connection from the app
+export SRV_PORT="8081"              
+export SRV_USE_SSL=false
+
+export SRV_KEY="/home/user/secret/key.pem"      # key
+export SRV_SERT="/home/user/secret/sert.pem"    # sert
+```
+
+### Finally, run the server
+
 ```bash
-git clone https://github.com/Loara228/smoking-control.git
+chmod +x run_http.sh & ./run_http.sh
 ```
 
 ```

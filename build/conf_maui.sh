@@ -2,7 +2,7 @@
 
 source ./conf.sh
 
-if [ "$SERVER_USE_SSL" = true ]; then
+if [ "$SRV_USE_SSL" = true ]; then
     protocol="https"
 else
     protocol="http"
@@ -12,8 +12,8 @@ cd "../smoking_control/smoking control/"
 cat << EOF > CONSTANTS.cs
 public static class CONSTANTS {
     public static string PROTOCOL = "$protocol";
-    public static string HOSTNAME = "$SERVER_HOSTNAME";
-    public static UInt16 PORT = $SERVER_PORT;
+    public static string HOSTNAME = "$SRV_HOSTNAME";
+    public static UInt16 PORT = $SRV_PORT;
 }
 EOF
 cat CONSTANTS.cs

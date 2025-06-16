@@ -1,12 +1,15 @@
 #!/bin/bash
 
-export SERVER_IP="0.0.0.0"				# auto
-export SERVER_HOSTNAME="192.168.0.148"	# domain or ip
-export SERVER_PORT="8081"
-export SERVER_USE_SSL=false
+export SRV_IP="0.0.0.0"
+export SRV_HOSTNAME="192.168.0.148"
+export SRV_PORT="8081"
+export SRV_USE_SSL=false
+
+export SRV_KEY="/home/user/code/smoking-control/build/secret/key.pem"
+export SRV_SERT="/home/user/code/smoking-control/build/secret/sert.pem"
 
 
-echo "IP: $SERVER_IP"
-echo "HOSTNAME: $SERVER_HOSTNAME"
-echo "PORT: $SERVER_PORT"
-echo "USE_SSL: $SERVER_USE_SSL"
+echo "IP: $SRV_IP"
+echo "HOSTNAME: $SRV_HOSTNAME"
+echo "PORT: $SRV_PORT"
+echo "USE_SSL: $SRV_USE_SSL"
