@@ -5,8 +5,8 @@ export SRV_HOSTNAME="192.168.0.148"
 export SRV_PORT="8081"
 export SRV_USE_SSL=false
 
-export SRV_KEY="/home/user/code/smoking-control/build/secret/key.pem"
-export SRV_CERT="/home/user/code/smoking-control/build/secret/sert.pem"
+export SRV_KEY="/etc/letsencrypt/live/<Domain.com>/privkey.pem"
+export SRV_CERT="/etc/letsencrypt/live/<Domain.com>/cert.pem"
 
 
 echo "IP: $SRV_IP"
