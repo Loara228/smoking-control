@@ -1,8 +1,10 @@
 use std::net::SocketAddrV4;
 
+#[cfg(target_os="linux")]
+use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
+
 use actix_web::{web, App, HttpServer};
 use clap::Parser;
-use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use sqlx::{PgPool, Pool, Postgres};
 use tracing::level_filters::LevelFilter;
 
@@ -69,26 +71,37 @@ async fn main() -> std::io::Result<()> {
                 .run()
                 .await
         },
+        
         cli::RunCommand::HTTPS { key, sert } => {
-            let addr: SocketAddrV4 = format!("{}:443", args.addr).parse().unwrap();
-
-            let p_key = std::path::Path::new(key);
-            let p_sert = std::path::Path::new(sert);
-
-            if !p_key.exists() {
-                panic!("{p_key:?} not found!");
+            
+            #[cfg(target_os="windows")]
+            {
+                println!("");
+                println!("");
+                panic!("");
             }
-            if !p_sert.exists() {
-                panic!("{p_sert:?} not found!");
+            #[cfg(target_os="linux")]
+            {
+                let addr: SocketAddrV4 = format!("{}:443", args.addr).parse().unwrap();
+
+                let p_key = std::path::Path::new(key);
+                let p_sert = std::path::Path::new(sert);
+
+                if !p_key.exists() {
+                    panic!("{p_key:?} not found!");
+                }
+                if !p_sert.exists() {
+                    panic!("{p_sert:?} not found!");
+                }
+
+                let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
+                builder.set_private_key_file(p_key, SslFiletype::PEM).unwrap();
+                builder.set_certificate_chain_file(p_sert).unwrap();
+
+                server.bind_openssl(addr, builder)?
+                .run()
+                .await
             }
-
-            let mut builder =SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
-            builder.set_private_key_file(p_key, SslFiletype::PEM).unwrap();
-            builder.set_certificate_chain_file(p_sert).unwrap();
-
-            server.bind_openssl(addr, builder)?
-            .run()
-            .await
         }
     }
 }
