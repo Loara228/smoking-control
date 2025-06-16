@@ -3,4 +3,4 @@
 source ./conf.sh
 
 cd ../api
-cargo run
+# todo

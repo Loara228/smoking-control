@@ -1,9 +1,13 @@
 use std::net::SocketAddrV4;
 
 use actix_web::{web, App, HttpServer};
+use clap::Parser;
 use sqlx::{PgPool, Pool, Postgres};
 use tracing::level_filters::LevelFilter;
 
+use crate::cli::Cli;
+
+mod cli;
 mod sql;
 mod models;
 mod services;
@@ -28,22 +32,12 @@ impl AppState {
 async fn main() -> std::io::Result<()> {
     tracing_subscriber::fmt().with_max_level(LevelFilter::INFO).init();
 
-    let ip = std::env::var("SERVER_IP").unwrap_or_else(|_| {
-        tracing::warn!("The standard local address is used");
-        "127.0.0.1".to_owned()
-    });
-    let port = std::env::var("SERVER_PORT").unwrap_or_else(|_| {
-        tracing::warn!("The standard port is used");
-        "8080".to_owned()
-    });
-    let addr: SocketAddrV4 = format!("{ip}:{port}").parse().unwrap();
-
-    tracing::info!("{addr:?}");
+    let args = Cli::parse();
 
     let app_state = AppState::new().await;
     sql::create_table(&app_state.pool).await.unwrap();
 
-    HttpServer::new(move || {
+    let server = HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(app_state.clone()))
 
@@ -64,10 +58,18 @@ async fn main() -> std::io::Result<()> {
             .service(services::get_logs)
             .service(services::get_logs_today)
         
-    })
-    .bind(addr)?
-    .run()
-    .await
+    });
+
+    match &args.command {
+        cli::RunCommand::HTTP { port } => {
+            let addr: SocketAddrV4 = format!("{}:{}", args.addr, *port).parse().unwrap();
+
+            server.bind(addr)?
+                .run()
+                .await
+        },
+        cli::RunCommand::HTTPS {} => todo!()
+    }
 }
 
 // unix utc time

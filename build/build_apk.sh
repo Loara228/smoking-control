@@ -5,4 +5,3 @@ source ./conf.sh
 
 cd ../smoking_control
 dotnet publish -f net9.0-android -c Release
-# "bin\Debug\net9.0-windows10.0.19041.0\win10-x64\publish\smoking_control.exe

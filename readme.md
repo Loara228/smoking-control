@@ -16,27 +16,21 @@ The app displays the elapsed time since the last nicotine intake. It also shows 
 
 ## 🛠️ Steps to run:
 
-### PostgreSQL (Linux)
+### PostgreSQL
 
-```
+```bash
 sudo apt update
 sudo apt install postgresql postgresql-contrib
 sudo systemctl start postgresql.service
+sudo -i -u postgres
+psql
 ```
-### PostgreSQL (Windows)
-
-[installer](https://www.postgresql.org/download/windows/)
-
-### Database
 
 ```sql
--- postgres=#
 create user usr with password 'password';
 CREATE DATABASE sc_db WITH OWNER = usr
 grant all privileges on database sc_db to usr;
 ```
-
-### Build
 
 ```bash
 git clone https://github.com/Loara228/smoking-control.git
