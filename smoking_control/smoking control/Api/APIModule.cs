@@ -24,7 +24,8 @@ namespace smoking_control.Api
         // returns http://192.168.0.148:8080/users/get/1
         protected string BuildQuery(string route, (string pName, string pValue)[]? queries = default)
         {
-            string result = $"{APIClient.PROTOCOL}://{APIClient.HOSTNAME}:{APIClient.PORT}/api/{route}?";
+            string port = APIClient.PORT == 443 ? "" : ":" + APIClient.PORT.ToString();
+            string result = $"{APIClient.PROTOCOL}://{APIClient.HOSTNAME}{port}/api/{route}?";
 
             if (queries is not null)
                 foreach ((string k, string v) pair in queries)

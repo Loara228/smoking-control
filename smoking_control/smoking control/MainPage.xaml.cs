@@ -63,6 +63,7 @@ namespace smoking_control
                 }
                 catch (Exception exc)
                 {
+                    SecureStorage.Default.Remove("token");
                     await ErrorPage.DisplayError(this, exc);
                 }
             }

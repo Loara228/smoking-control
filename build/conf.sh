@@ -6,7 +6,7 @@ export SRV_PORT="8081"
 export SRV_USE_SSL=false
 
 export SRV_KEY="/etc/letsencrypt/live/<Domain.com>/privkey.pem"
-export SRV_CERT="/etc/letsencrypt/live/<Domain.com>/cert.pem"
+export SRV_CERT="/etc/letsencrypt/live/<Domain.com>/fullchain.pem"
 
 
 echo "IP: $SRV_IP"

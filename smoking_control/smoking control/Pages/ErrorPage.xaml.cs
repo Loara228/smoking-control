@@ -34,5 +34,10 @@ public partial class ErrorPage : ContentPage
         }
     }
 
-	private bool _critical;
+    private void btn_Clicked(object sender, EventArgs e)
+    {
+		Clipboard.Default.SetTextAsync(excOutput.Text);
+    }
+
+    private bool _critical;
 }

@@ -14,14 +14,11 @@ The app displays the elapsed time since the last nicotine intake. It also shows 
 
 **Important**: Users should take this seriously and manually open the app and log each smoking event, otherwise the application will not help you much
 
-## Web
+## Usage
 
 [build and run server](./guide-linux.md)
 
 [build and run Windows/Android client](./guide-win_android.md)
-
-## Windows
-
 
 ```
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠟⠛⠋⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠙⠛⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
